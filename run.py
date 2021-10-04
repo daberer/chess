@@ -1,6 +1,6 @@
 import pygame, random
 import re
-from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King
+from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
 pygame.init()
 
 GREEN = (20, 255, 140)
@@ -13,7 +13,7 @@ LIGHT = (242,218,182)
 DARK = (181,135,99)
 
 start_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-start_fen = "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR"
+#start_fen = "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR"
 
 SCREENWIDTH=800
 SCREENHEIGHT=800
@@ -86,10 +86,22 @@ for y in ['A','B','C','D','E','F','G','H']:
         bo[f"{y}{x}"] = [(loc(y + str(x))), None]
 
 def fen_insert(st, length, ind):
-        return st[:ind] + length*'o' + st[ind+1:]
+    """
+    inserts up to eight "o" characters into an input string instead of an integer 1-8 at a given index.
+    :param st: string, that is being added to
+    :param length: int, number of times "o" is being added to st
+    :param ind: int, index where int is located in st.
+    :return:
+    """
+    return st[:ind] + length*'o' + st[ind+1:]
 
 def has_numbers(inputString):
-        return bool(re.search(r'\d', inputString))
+    """
+    Checks input string for numbers.
+    :param inputString:
+    :return: True if inputString has number.
+    """
+    return bool(re.search(r'\d', inputString))
 
 def extend_fen(fen):
     """
@@ -126,125 +138,70 @@ for i, field in enumerate(bo):
 
 
 
-#pawnloop
-
-# black_pawns = {}
-# white_pawns = {}
-#
-#
-# A_pawn_black = set_up_piece('black', 0, 100, Pawn)
-# B_pawn_black = set_up_piece('black', 100, 100, Pawn)
-# C_pawn_black = set_up_piece('black', 200, 100, Pawn)
-# D_pawn_black = set_up_piece('black', 300, 100, Pawn)
-# E_pawn_black = set_up_piece('black', 400, 100, Pawn)
-# F_pawn_black = set_up_piece('black', 500, 100, Pawn)
-# G_pawn_black = set_up_piece('black', 600, 100, Pawn)
-# H_pawn_black = set_up_piece('black', 700, 100, Pawn)
-#
-# black_pawns = [A_pawn_black, B_pawn_black, C_pawn_black, D_pawn_black, E_pawn_black, F_pawn_black, G_pawn_black, H_pawn_black]
-#
-# for pawn in black_pawns:
-#     all_sprites_list.add(pawn)
-#
-# A_pawn_white = set_up_piece('white', 0, 600, Pawn)
-# B_pawn_white = set_up_piece('white', 100, 600, Pawn)
-# C_pawn_white = set_up_piece('white', 200, 600, Pawn)
-# D_pawn_white = set_up_piece('white', 300, 600, Pawn)
-# E_pawn_white = set_up_piece('white', 400, 600, Pawn)
-# F_pawn_white = set_up_piece('white', 500, 600, Pawn)
-# G_pawn_white = set_up_piece('white', 600, 600, Pawn)
-# H_pawn_white = set_up_piece('white', 700, 600, Pawn)
-#
-# white_pawns = [A_pawn_white, B_pawn_white, C_pawn_white, D_pawn_white, E_pawn_white, F_pawn_white, G_pawn_white, H_pawn_white]
-#
-# for pawn in white_pawns:
-#     all_sprites_list.add(pawn)
-#
-#
-# x_knight_black = set_up_piece('black', 100, 0, Knight)
-# y_knight_black = set_up_piece('black', 500, 0, Knight)
-# x_bishop_black = set_up_piece('black', 200, 0, Bishop)
-# y_bishop_black = set_up_piece('black', 600, 0, Bishop)
-# x_rook_black = set_up_piece('black', 0, 0, Rook)
-# y_rook_black = set_up_piece('black', 700, 0, Rook)
-#
-#
-#
-# x_knight_white = set_up_piece('white', 100, 700, Knight)
-# y_knight_white = set_up_piece('white', 500, 700, Knight)
-# x_bishop_white = set_up_piece('white', 200, 700, Bishop)
-# y_bishop_white = set_up_piece('white', 600, 700, Bishop)
-# x_rook_white = set_up_piece('white', 0, 700, Rook)
-# y_rook_white = set_up_piece('white', 700, 700, Rook)
-#
-# queen_black = set_up_piece('black', 300, 0, Queen)
-# queen_white = set_up_piece('white', 300, 700, Queen)
-# king_black = set_up_piece('black', 400, 0, King)
-# king_white = set_up_piece('white', 400, 700, King)
-#
-# pieces = [x_knight_black, y_knight_black, x_bishop_black, y_bishop_black, x_rook_black, y_rook_black, queen_black,
-#           king_black, x_knight_white, y_knight_white, x_bishop_white, y_bishop_white, x_rook_white, y_rook_white,
-#           queen_white, king_white]
-#
-# for piece in pieces:
-#     all_sprites_list.add(piece)
 
 
 
 
-black_knight = Knight('white')
-black_knight.rect.x = 350
-black_knight.rect.y = 350
 
-
-
-# Add the knight to the list of objects
-
-
-all_sprites_list.add(black_knight)
 
 #Allowing the user to close the window...
 carryOn = True
 clock=pygame.time.Clock()
+score = 0
+pl = Player()
+all_sprites_list.add(pl)
+
+
+#Drawing on Screen
+screen.fill(GREEN)
+
+
+
+sometimes = -1
 
 while carryOn:
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
-                carryOn=False
-            elif event.type==pygame.KEYDOWN:
-                if event.key==pygame.K_x: #Pressing the x Key will quit the game
-                     carryOn=False
+                 carryOn=False
 
-        mx, my = pygame.mouse.get_pos()
-        black_knight.move(mx, my)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                blocks_hit_list = pygame.sprite.spritecollide(pl, all_sprites_list, False)
+                pl.carry_pieces_list = blocks_hit_list
 
-
-        #Game Logic
-        all_sprites_list.update()
-
-        #Drawing on Screen
-        screen.fill(GREEN)
-
-        #Draw The Board
-        for y in range(8):
-            y_loc = y * 100
-            for i in range(8):
-                x_loc = i*100
-                if i % 2 == 0 and y % 2 == 1 or i % 2 == 1 and y % 2 == 0:
-                    pygame.draw.rect(screen, DARK, pygame.Rect(x_loc,y_loc, x_loc+100,y_loc+100))
-
-                else:
-                    pygame.draw.rect(screen, LIGHT, pygame.Rect(x_loc,y_loc, x_loc+100,y_loc+100))
+            elif event.type == pygame.MOUSEBUTTONUP:
+                pl.carry_pieces_list = []
 
 
 
-        #Now let's draw all the sprites in one go. (For now we only have 1 sprite!)
-        all_sprites_list.draw(screen)
 
-        #Refresh Screen
-        pygame.display.flip()
+            sometimes += 1
+            if sometimes % 5 == 0:
+                #Draw The Board
+                for y in range(8):
+                    y_loc = y * 100
+                    for i in range(8):
+                        x_loc = i*100
+                        if i % 2 == 0 and y % 2 == 1 or i % 2 == 1 and y % 2 == 0:
+                            pygame.draw.rect(screen, DARK, pygame.Rect(x_loc,y_loc, x_loc+100,y_loc+100))
 
-        #Number of frames per secong e.g. 60
-        clock.tick(60)
+                        else:
+                            pygame.draw.rect(screen, LIGHT, pygame.Rect(x_loc,y_loc, x_loc+100,y_loc+100))
+
+
+
+
+
+
+                #Game Logic
+                all_sprites_list.update()
+
+            #Now let's draw all the sprites in one go.
+            all_sprites_list.draw(screen)
+
+            #Refresh Screen
+            pygame.display.flip()
+
+            #Number of frames per secong e.g. 60
+            clock.tick(100)
 
 pygame.quit()

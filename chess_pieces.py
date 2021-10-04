@@ -1,5 +1,13 @@
 import pygame
+import math
+
 WHITE = (255, 255, 255)
+GREEN = (20, 255, 140)
+
+centers = []
+for x in range(0, 700, 100):
+    for y in range(0, 700, 100):
+        centers.append((x,y))
 
 class Pawn(pygame.sprite.Sprite):
     #This class represents a car. It derives from the "Sprite" class in Pygame.
@@ -48,9 +56,8 @@ class Knight(pygame.sprite.Sprite):
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
 
-    def move(self, x, y):
-        self.rect.x = x
-        self.rect.y = y
+
+
 
 
 class Bishop(pygame.sprite.Sprite):
@@ -146,6 +153,48 @@ class King(pygame.sprite.Sprite):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
+
+class Player(pygame.sprite.Sprite):
+    """
+    This class represents the player
+    """
+    def __init__(self):
+        """ Constructor. Pass in the color of the block,
+        and its x and y position. """
+
+        # Call the parent class (Sprite) constructor
+        super().__init__()
+        self.image = pygame.Surface([15, 15])
+        self.image.set_alpha(100)
+        self.image.fill(WHITE)
+        #self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()
+        self.carry_pieces_list = []
+
+    def update(self):
+        pos = pygame.mouse.get_pos()
+
+        diff_x = self.rect.x - pos[0]
+        diff_y = self.rect.y - pos[1]
+
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+
+        for piece in self.carry_pieces_list:
+            piece.rect.x -= diff_x
+            piece.rect.y -= diff_y
+            if (math.hypot(int(str(piece.rect.x)[-2:]), int(str(piece.rect.y)[-2:])) < 50 or \
+                    math.hypot(abs(int(str(piece.rect.x)[-2:])-100), abs(int(str(piece.rect.y)[-2:])-100)) < 50):
+                #and (piece.rect.x % 100 != 0 and piece.rect.y % 100 != 0):
+                piece.rect.x = round(piece.rect.x, -2)
+                piece.rect.y = round(piece.rect.y, -2)
+            break
+
+
+
+
+
+
 
 
 
