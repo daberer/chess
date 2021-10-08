@@ -131,19 +131,6 @@ for i, field in enumerate(bo):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 #Allowing the user to close the window...
 carryOn = True
 clock=pygame.time.Clock()
@@ -156,9 +143,11 @@ all_sprites_list.add(pl)
 screen.fill(GREEN)
 
 
+#board = pygame.sprite.Group()
+fields = [(i * 100, j * 100) for j in range(8) for i in range(8)]
 
-sometimes = -1
 
+import time
 while carryOn:
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
@@ -166,26 +155,28 @@ while carryOn:
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 blocks_hit_list = pygame.sprite.spritecollide(pl, all_sprites_list, False)
+                blocks_hit_list.pop(-1)
                 pl.carry_pieces_list = blocks_hit_list
+
+
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 pl.carry_pieces_list = []
 
+            for i, field in enumerate(fields):
+                if (i + int(i / 8)) % 2 == 0:
+                    pygame.draw.rect(screen, DARK, pygame.Rect(field[0],field[1], 100,100))
+                else:
+                    pygame.draw.rect(screen, LIGHT, pygame.Rect(field[0],field[1], 100,100))
+
+            all_sprites_list.update()
 
 
 
-            sometimes += 1
-            if sometimes % 5 == 0:
-                #Draw The Board
-                for y in range(8):
-                    y_loc = y * 100
-                    for i in range(8):
-                        x_loc = i*100
-                        if i % 2 == 0 and y % 2 == 1 or i % 2 == 1 and y % 2 == 0:
-                            pygame.draw.rect(screen, DARK, pygame.Rect(x_loc,y_loc, x_loc+100,y_loc+100))
 
-                        else:
-                            pygame.draw.rect(screen, LIGHT, pygame.Rect(x_loc,y_loc, x_loc+100,y_loc+100))
+
+
+
 
 
 
@@ -193,7 +184,7 @@ while carryOn:
 
 
                 #Game Logic
-                all_sprites_list.update()
+
 
             #Now let's draw all the sprites in one go.
             all_sprites_list.draw(screen)
@@ -202,6 +193,6 @@ while carryOn:
             pygame.display.flip()
 
             #Number of frames per secong e.g. 60
-            clock.tick(100)
+            clock.tick(80)
 
 pygame.quit()

@@ -165,7 +165,7 @@ class Player(pygame.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         super().__init__()
         self.image = pygame.Surface([15, 15])
-        self.image.set_alpha(100)
+        self.image.set_alpha(128)
         self.image.fill(WHITE)
         #self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()
@@ -180,11 +180,13 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+
         for piece in self.carry_pieces_list:
+            print(piece.__class__.__name__)
             piece.rect.x -= diff_x
             piece.rect.y -= diff_y
-            if (math.hypot(int(str(piece.rect.x)[-2:]), int(str(piece.rect.y)[-2:])) < 50 or \
-                    math.hypot(abs(int(str(piece.rect.x)[-2:])-100), abs(int(str(piece.rect.y)[-2:])-100)) < 50):
+            if (math.hypot(int(str(piece.rect.x)[-2:]), int(str(piece.rect.y)[-2:])) < 30 or \
+                    math.hypot(abs(int(str(piece.rect.x)[-2:])-100), abs(int(str(piece.rect.y)[-2:])-100)) < 30):
                 #and (piece.rect.x % 100 != 0 and piece.rect.y % 100 != 0):
                 piece.rect.x = round(piece.rect.x, -2)
                 piece.rect.y = round(piece.rect.y, -2)
