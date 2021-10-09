@@ -21,6 +21,7 @@ SCREENHEIGHT=800
 size = (SCREENWIDTH, SCREENHEIGHT)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Chess")
+font = pygame.font.Font(pygame.font.get_default_font(), 56)
 
 #This will be a list that will contain all the sprites we intend to use in our game.
 all_sprites_list = pygame.sprite.Group()
@@ -81,9 +82,11 @@ def loc(str):
 
 #create board dict
 bo = {}
+ob = {}
 for y in ['A','B','C','D','E','F','G','H']:
     for x in range(1,9):
         bo[f"{y}{x}"] = [(loc(y + str(x))), None]
+        ob[(loc(y + str(x)))] = f"{y}{x}"
 
 def fen_insert(st, length, ind):
     """
@@ -126,6 +129,7 @@ for i, field in enumerate(bo):
     co, ty = fen_code(start_fen[i])
     if ty is not None:
         piece = set_up_piece(co, bo[field][0], ty)
+        bo[field][1] = piece
         all_sprites_list.add(piece)
 
 
@@ -146,6 +150,7 @@ screen.fill(GREEN)
 #board = pygame.sprite.Group()
 fields = [(i * 100, j * 100) for j in range(8) for i in range(8)]
 
+game_over = False
 
 import time
 while carryOn:
@@ -161,7 +166,25 @@ while carryOn:
 
 
             elif event.type == pygame.MOUSEBUTTONUP:
-                pl.carry_pieces_list = []
+                if len(pl.carry_pieces_list) > 0:
+                    piece = pl.carry_pieces_list[0]
+                    piecex = round(piece.rect.x, -2)
+                    piecey = round(piece.rect.y, -2)
+                    piece.rect.x = piecex
+                    piece.rect.y = piecey
+                    old_inhabitant = bo[ob[piecex, piecey]][1]
+                    if old_inhabitant != None:# check if someone is there
+                        if piece.color != old_inhabitant.color:
+                            old_inhabitant.kill()
+                            # Check if killed piece was the King
+                            if old_inhabitant.__class__.__name__ == 'King':
+
+                                game_over=True
+
+                            bo[ob[piecex, piecey]][1] = piece
+                    else:
+                        bo[ob[piecex, piecey]][1] = piece
+                    pl.carry_pieces_list = []
 
             for i, field in enumerate(fields):
                 if (i + int(i / 8)) % 2 == 0:
@@ -174,15 +197,6 @@ while carryOn:
 
 
 
-
-
-
-
-
-
-
-
-
                 #Game Logic
 
 
@@ -191,7 +205,13 @@ while carryOn:
 
             #Refresh Screen
             pygame.display.flip()
-
+            if game_over:
+                text_surface = font.render(f'{piece.color} wins!', True, (0, 0, 0))
+                screen.blit(text_surface, dest=(270,350))
+                pygame.display.flip()
+                import time
+                time.sleep(5)
+                pygame.quit()
             #Number of frames per secong e.g. 60
             clock.tick(80)
 
