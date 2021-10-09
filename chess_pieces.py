@@ -1,5 +1,4 @@
 import pygame
-import math
 
 WHITE = (255, 255, 255)
 GREEN = (20, 255, 140)
@@ -10,18 +9,19 @@ for x in range(0, 700, 100):
         centers.append((x,y))
 
 class Pawn(pygame.sprite.Sprite):
-    #This class represents a car. It derives from the "Sprite" class in Pygame.
 
-    def __init__(self, color):
+    def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__()
-
-        # Pass in the color of the car, and its x and y position, width and height.
-        # Set the background color and set it to be transparent
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
         self.image.fill(WHITE)
         self.image.set_colorkey(WHITE)
         self.color = color
+        self.field = field
+        if color == 'white':
+            self.move = (0, 100)
+        else:
+            self.move = (0, -100)
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_pawn.png").convert_alpha()
@@ -33,21 +33,16 @@ class Pawn(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 class Knight(pygame.sprite.Sprite):
-    #This class represents a car. It derives from the "Sprite" class in Pygame.
 
-    def __init__(self, color):
+    def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__()
-
-        # Pass in the color of the car, and its x and y position, width and height.
-        # Set the background color and set it to be transparent
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
         self.image.fill(WHITE)
         self.image.set_colorkey(WHITE)
         self.color = color
-        self.dist = 10
+        self.field = field
 
-        # Instead we could load a proper pciture of a car...
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_knight.png").convert_alpha()
         else:
@@ -58,22 +53,16 @@ class Knight(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
-
-
-
 class Bishop(pygame.sprite.Sprite):
-    #This class represents a car. It derives from the "Sprite" class in Pygame.
 
-    def __init__(self, color):
+    def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__()
-
-        # Pass in the color of the car, and its x and y position, width and height.
-        # Set the background color and set it to be transparent
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
         self.image.fill(WHITE)
         self.image.set_colorkey(WHITE)
         self.color = color
+        self.field = field
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_bishop.png").convert_alpha()
@@ -85,18 +74,16 @@ class Bishop(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 class Rook(pygame.sprite.Sprite):
-    #This class represents a car. It derives from the "Sprite" class in Pygame.
 
-    def __init__(self, color):
+    def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__()
 
-        # Pass in the color of the car, and its x and y position, width and height.
-        # Set the background color and set it to be transparent
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
         self.image.fill(WHITE)
         self.image.set_colorkey(WHITE)
         self.color = color
+        self.field = field
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_rook.png").convert_alpha()
@@ -109,18 +96,16 @@ class Rook(pygame.sprite.Sprite):
 
 
 class Queen(pygame.sprite.Sprite):
-    #This class represents a car. It derives from the "Sprite" class in Pygame.
 
-    def __init__(self, color):
+    def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__()
 
-        # Pass in the color of the car, and its x and y position, width and height.
-        # Set the background color and set it to be transparent
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
         self.image.fill(WHITE)
         self.image.set_colorkey(WHITE)
         self.color = color
+        self.field = field
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_queen.png").convert_alpha()
@@ -133,18 +118,15 @@ class Queen(pygame.sprite.Sprite):
 
 
 class King(pygame.sprite.Sprite):
-    #This class represents a car. It derives from the "Sprite" class in Pygame.
-
-    def __init__(self, color):
+    def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__()
 
-        # Pass in the color of the car, and its x and y position, width and height.
-        # Set the background color and set it to be transparent
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
         self.image.fill(WHITE)
         self.image.set_colorkey(WHITE)
         self.color = color
+        self.field = field
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_king.png").convert_alpha()
@@ -168,32 +150,16 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface([15, 15])
         self.image.set_alpha(128)
         self.image.fill(WHITE)
-        #self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()
         self.carry_pieces_list = []
 
     def update(self):
         pos = pygame.mouse.get_pos()
-
-        #diff_x = self.rect.x - pos[0]
-        #diff_y = self.rect.y - pos[1]
-
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
-        # print(pos[0], pos[1])
-
-
         for piece in self.carry_pieces_list:
             piece.rect.center = (pos[0], pos[1])
-            # if (math.hypot(int(str(piece.rect.x)[-2:]), int(str(piece.rect.y)[-2:])) < 30 or \
-            #         math.hypot(abs(int(str(piece.rect.x)[-2:])-100), abs(int(str(piece.rect.y)[-2:])-100)) < 30):
-            #     #and (piece.rect.x % 100 != 0 and piece.rect.y % 100 != 0):
-            #     piece.rect.x = round(piece.rect.x, -2)
-            #     piece.rect.y = round(piece.rect.y, -2)
-            break
-
-
 
 
 

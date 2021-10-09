@@ -21,14 +21,14 @@ SCREENHEIGHT=800
 size = (SCREENWIDTH, SCREENHEIGHT)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Chess")
-font = pygame.font.Font(pygame.font.get_default_font(), 56)
+font = pygame.font.SysFont(None, 100)
 
 #This will be a list that will contain all the sprites we intend to use in our game.
 all_sprites_list = pygame.sprite.Group()
 
 #Set up pieces
-def set_up_piece(color, coordinate_tuple, type):
-    piece = type(color)
+def set_up_piece(color, coordinate_tuple, kind, field):
+    piece = kind(color, field)
     piece.rect.x = coordinate_tuple[0]
     piece.rect.y = coordinate_tuple[1]
     return piece
@@ -128,11 +128,16 @@ start_fen = extend_fen(start_fen)
 for i, field in enumerate(bo):
     co, ty = fen_code(start_fen[i])
     if ty is not None:
-        piece = set_up_piece(co, bo[field][0], ty)
+        piece = set_up_piece(co, bo[field][0], ty, field)
         bo[field][1] = piece
         all_sprites_list.add(piece)
 
 
+def check_legal_move(move, old_field, new_field):
+    if tuple(map(lambda i, j: i + j, old_field, move)) == new_field:
+        return True
+    else:
+        return False
 
 
 #Allowing the user to close the window...
@@ -170,20 +175,25 @@ while carryOn:
                     piece = pl.carry_pieces_list[0]
                     piecex = round(piece.rect.x, -2)
                     piecey = round(piece.rect.y, -2)
-                    piece.rect.x = piecex
-                    piece.rect.y = piecey
-                    old_inhabitant = bo[ob[piecex, piecey]][1]
-                    if old_inhabitant != None:# check if someone is there
-                        if piece.color != old_inhabitant.color:
-                            old_inhabitant.kill()
-                            # Check if killed piece was the King
-                            if old_inhabitant.__class__.__name__ == 'King':
+                    if check_legal_move(piece.move, bo[piece.field][0], (piecex, piecey)):
+                        piece.rect.x = piecex
+                        piece.rect.y = piecey
+                        old_inhabitant = bo[ob[piecex, piecey]][1]
+                        if old_inhabitant != None:# check if someone is there
+                            if piece.color != old_inhabitant.color:
+                                old_inhabitant.kill()
+                                # Check if killed piece was the King
+                                if old_inhabitant.__class__.__name__ == 'King':
+                                    game_over=True
 
-                                game_over=True
 
-                            bo[ob[piecex, piecey]][1] = piece
-                    else:
+                        #update_bo
                         bo[ob[piecex, piecey]][1] = piece
+                        bo[piece.field][1] = None
+                        piece.field = ob[piecex, piecey]
+                    else:
+                        piece.rect.x = bo[piece.field][0][0]
+                        piece.rect.y = bo[piece.field][0][1]
                     pl.carry_pieces_list = []
 
             for i, field in enumerate(fields):
@@ -196,23 +206,19 @@ while carryOn:
 
 
 
-
-                #Game Logic
-
-
             #Now let's draw all the sprites in one go.
             all_sprites_list.draw(screen)
 
             #Refresh Screen
             pygame.display.flip()
             if game_over:
-                text_surface = font.render(f'{piece.color} wins!', True, (0, 0, 0))
-                screen.blit(text_surface, dest=(270,350))
+                text_surface = font.render(f'{piece.color} wins!', True, (64, 224, 208))
+                screen.blit(text_surface, dest=(200,350))
                 pygame.display.flip()
                 import time
                 time.sleep(5)
                 pygame.quit()
             #Number of frames per secong e.g. 60
-            clock.tick(80)
+            clock.tick(200)
 
 pygame.quit()
