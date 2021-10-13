@@ -18,10 +18,6 @@ class Pawn(pygame.sprite.Sprite):
         self.image.set_colorkey(WHITE)
         self.color = color
         self.field = field
-        if color == 'white':
-            self.move = (0, 100)
-        else:
-            self.move = (0, -100)
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_pawn.png").convert_alpha()

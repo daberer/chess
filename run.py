@@ -1,6 +1,7 @@
 import pygame, random
 import re
 from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
+from move import Move
 pygame.init()
 
 GREEN = (20, 255, 140)
@@ -12,7 +13,8 @@ BLACK = (0,0,0)
 LIGHT = (242,218,182)
 DARK = (181,135,99)
 
-start_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+#TODO: fix fen set up (Queen and King are set conversly)
+start_fen = 'rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR'
 #start_fen = "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR"
 
 SCREENWIDTH=800
@@ -78,15 +80,17 @@ def loc(str):
     assert(len(str)==2)
     cha = list(str)[0]
     num = list(str)[1]
-    return int(num)*100-100, (7-(ord(cha)-65))*100
+    return ((ord(cha)-65))*100, 800-int(num)*100
 
 #create board dict
 bo = {}
 ob = {}
-for y in ['A','B','C','D','E','F','G','H']:
-    for x in range(1,9):
+for x in range(1,9):
+    for y in ['A','B','C','D','E','F','G','H']:
         bo[f"{y}{x}"] = [(loc(y + str(x))), None]
         ob[(loc(y + str(x)))] = f"{y}{x}"
+
+
 
 def fen_insert(st, length, ind):
     """
@@ -124,6 +128,7 @@ def extend_fen(fen):
 
 start_fen = start_fen.replace('/','')
 start_fen = extend_fen(start_fen)
+start_fen = start_fen[::-1]
 
 for i, field in enumerate(bo):
     co, ty = fen_code(start_fen[i])
@@ -132,12 +137,6 @@ for i, field in enumerate(bo):
         bo[field][1] = piece
         all_sprites_list.add(piece)
 
-
-def check_legal_move(move, old_field, new_field):
-    if tuple(map(lambda i, j: i + j, old_field, move)) == new_field:
-        return True
-    else:
-        return False
 
 
 #Allowing the user to close the window...
@@ -157,7 +156,29 @@ fields = [(i * 100, j * 100) for j in range(8) for i in range(8)]
 
 game_over = False
 
-import time
+def go_home(piece):
+    """
+    Return piece to position it had prior to move
+    :param piece:
+    :return:
+    """
+    piece.rect.x = bo[piece.field][0][0]
+    piece.rect.y = bo[piece.field][0][1]
+
+def update(piece, piecex, piecey):
+    """
+    Update dictionary with positions
+    :param piece:
+    :param piecex:
+    :param piecey:
+    :return:
+    """
+    bo[ob[piecex, piecey]][1] = piece
+    bo[piece.field][1] = None
+    piece.field = ob[piecex, piecey]
+
+
+
 while carryOn:
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
@@ -175,7 +196,10 @@ while carryOn:
                     piece = pl.carry_pieces_list[0]
                     piecex = round(piece.rect.x, -2)
                     piecey = round(piece.rect.y, -2)
-                    if check_legal_move(piece.move, bo[piece.field][0], (piecex, piecey)):
+                    mv = Move(bo[piece.field][0], (piecex, piecey))
+
+                    # check if move is legal
+                    if mv.isthisallowed(piece):
                         piece.rect.x = piecex
                         piece.rect.y = piecey
                         old_inhabitant = bo[ob[piecex, piecey]][1]
@@ -184,16 +208,16 @@ while carryOn:
                                 old_inhabitant.kill()
                                 # Check if killed piece was the King
                                 if old_inhabitant.__class__.__name__ == 'King':
-                                    game_over=True
+                                    game_over = True
+                                update(piece, piecex, piecey)
+                            else:
+                                go_home(piece)
 
-
-                        #update_bo
-                        bo[ob[piecex, piecey]][1] = piece
-                        bo[piece.field][1] = None
-                        piece.field = ob[piecex, piecey]
+                        else:
+                            update(piece, piecex, piecey)
                     else:
-                        piece.rect.x = bo[piece.field][0][0]
-                        piece.rect.y = bo[piece.field][0][1]
+                        go_home(piece)
+
                     pl.carry_pieces_list = []
 
             for i, field in enumerate(fields):
