@@ -173,6 +173,13 @@ def update(piece, piecex, piecey):
     :param piecey:
     :return:
     """
+    if (piece.color == 'white' and piecey == 0) or (piece.color == 'black' and piecey == 700):
+        field = piece.field
+        piece.kill()
+        piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
+
+        all_sprites_list.add(piece)
+
     bo[ob[piecex, piecey]][1] = piece
     bo[piece.field][1] = None
     piece.field = ob[piecex, piecey]
@@ -186,7 +193,9 @@ while carryOn:
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 blocks_hit_list = pygame.sprite.spritecollide(pl, all_sprites_list, False)
-                blocks_hit_list.pop(-1)
+                for i, block in enumerate(blocks_hit_list):
+                    if block.name() == 'Player':
+                        blocks_hit_list.pop(i)
                 pl.carry_pieces_list = blocks_hit_list
 
 
@@ -196,18 +205,18 @@ while carryOn:
                     piece = pl.carry_pieces_list[0]
                     piecex = round(piece.rect.x, -2)
                     piecey = round(piece.rect.y, -2)
-                    mv = Move(bo[piece.field][0], (piecex, piecey))
-
+                    old_inhabitant = bo[ob[piecex, piecey]][1]
+                    mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant)
                     # check if move is legal
-                    if mv.isthisallowed(piece):
+                    if mv.isthisallowed():
                         piece.rect.x = piecex
                         piece.rect.y = piecey
-                        old_inhabitant = bo[ob[piecex, piecey]][1]
+
                         if old_inhabitant != None:# check if someone is there
                             if piece.color != old_inhabitant.color:
                                 old_inhabitant.kill()
                                 # Check if killed piece was the King
-                                if old_inhabitant.__class__.__name__ == 'King':
+                                if old_inhabitant.name() == 'King':
                                     game_over = True
                                 update(piece, piecex, piecey)
                             else:

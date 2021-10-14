@@ -8,7 +8,14 @@ for x in range(0, 700, 100):
     for y in range(0, 700, 100):
         centers.append((x,y))
 
-class Pawn(pygame.sprite.Sprite):
+class Piece(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+    def name(self):
+        return self.__class__.__name__
+
+class Pawn(Piece):
 
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
@@ -28,8 +35,11 @@ class Pawn(pygame.sprite.Sprite):
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
 
-class Knight(pygame.sprite.Sprite):
 
+
+
+
+class Knight(Piece):
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__()
@@ -49,7 +59,7 @@ class Knight(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
-class Bishop(pygame.sprite.Sprite):
+class Bishop(Piece):
 
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
@@ -69,7 +79,7 @@ class Bishop(pygame.sprite.Sprite):
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
 
-class Rook(pygame.sprite.Sprite):
+class Rook(Piece):
 
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
@@ -91,7 +101,7 @@ class Rook(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
-class Queen(pygame.sprite.Sprite):
+class Queen(Piece):
 
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
@@ -113,7 +123,7 @@ class Queen(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
-class King(pygame.sprite.Sprite):
+class King(Piece):
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__()
@@ -148,6 +158,9 @@ class Player(pygame.sprite.Sprite):
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.carry_pieces_list = []
+
+    def name(self):
+        return self.__class__.__name__
 
     def update(self):
         pos = pygame.mouse.get_pos()
