@@ -1,13 +1,17 @@
 import math
 
 class Move():
-    def __init__(self, old_field, new_field, piece, old_inhabitant):
+    def __init__(self, old_field, new_field, piece, old_inhabitant, bo, ob):
         self.old_field = old_field
         self.new_field = new_field
         self.piece = piece
         self.move = None
         self.diff = tuple(map(lambda i,j: i - j, self.old_field, self.new_field))
+        self.dist = round(math.hypot(self.diff[0], self.diff[1]), 2)
         self.old_inhabitant = old_inhabitant
+        self.bo = bo
+        self.ob = ob
+
 
 
     # def isanyonehome(self, old_inhabitant):
@@ -17,6 +21,33 @@ class Move():
     #             # Check if killed piece was the King
     #             if old_inhabitant.name() == 'King':
     #                 return True
+
+
+    def noroadblocks(self):
+        if self.piece.name() not in ['Bishop', 'Rook', 'Queen']:
+            return True
+        # diagonal = True
+        # if round(self.dist % 100, 2) == 0:
+        #     diagonal = False
+        ontheway = self.get_fields_on_the_way(self.ob[self.old_field], self.ob[self.new_field])
+        for block in ontheway:
+            if self.bo[block][1] != None:
+                return False
+        return True
+
+        # if round(self.dist % 141.42, 2) == 0:
+        #     numb_of_steps = int(round(self.dist / 141.42, 0))
+        #     one_step = tuple(map(lambda i: i / numb_of_steps, self.diff))
+        #     for i in range(numb_of_steps-1):
+        #         step = tuple(map(lambda j: j * i, one_step))
+        #         self.add_two_tuples(self.old_field, step)
+
+
+
+
+
+
+
 
     def isthisallowed(self):
         if self.old_field == self.new_field:
@@ -43,12 +74,12 @@ class Move():
             if self.piece.color == 'white':
                 self.move = [tuple([-1*i for i in j]) for j in self.move]# change sign
             for mo in self.move:
-                if tuple(map(lambda i, j: i + j, self.old_field, mo)) == self.new_field:
+                if self.add_two_tuples(self.old_field, mo) == self.new_field:
                     return True
 
         # move pawn diagonally
-        dist = round(math.hypot(self.diff[0], self.diff[1]), 2)
-        if dist == 141.42:
+
+        if self.dist == 141.42:
             if self.piece.color == 'white' and self.diff[1] > 0 and self.old_inhabitant:
                 return True
             if self.piece.color == 'black' and self.diff[1] < 0 and self.old_inhabitant:
@@ -57,7 +88,7 @@ class Move():
 
     def knight(self):
         # knight always hops the same distance..
-        if round(math.hypot(self.diff[0], self.diff[1]),2) == 223.61:
+        if self.dist == 223.61:
             return True
         return False
 
@@ -77,13 +108,43 @@ class Move():
         return False
 
     def king(self):
-        dist = round(math.hypot(self.diff[0], self.diff[1]), 2)
-        if  dist == 141.42 or dist == 100:
+        if self.dist == 141.42 or self.dist == 100:
             return True
         return False
 
+    ########### helper functions
 
+    def add_two_tuples(self, one, two):
+        return tuple(map(lambda i, j: i + j, one, two))
 
+    def get_fields_on_the_way(self, start, end):
+        """
+        Finds fields between a start field and an end field (for movement of bishops, rooks and queens)
+        :param start: str, field where piece started (e.g. 'F4')
+        :param end: str, field where piece wants to move to
+        :return: list, fields between start and end field
+        """
+        ch1 = start[0]
+        ch2 = end[0]
+        nu1 = start[1]
+        nu2 = end[1]
+        if ord(ch1) > ord(ch2):
+            let = [chr(i) for i in list(range(ord(ch1), ord(ch2), -1))[1:]]
+        else:
+            let = [chr(i) for i in list(range(ord(ch1), ord(ch2)))[1:]]
+        if int(nu1) > int(nu2):
+            num = [str(x) for x in list(range(int(nu1), int(nu2), -1))[1:]]
+        else:
+            num = [str(x) for x in list(range(int(nu1), int(nu2)))[1:]]
 
+        # if movement is rook-move
+        if len(let) == 0 and len(num) > 0:
+            ret = [ch1 + num[i] for i in range(len(num))]
+        elif len(let) > 0 and len(num) == 0:
+            ret = [let[i] + nu1 for i in range(len(let))]
+        else:
+            ret = [let[i] + num[i] for i in range(len(num))]
+
+        return ret
 
 

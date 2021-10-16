@@ -206,24 +206,27 @@ while carryOn:
                     piecex = round(piece.rect.x, -2)
                     piecey = round(piece.rect.y, -2)
                     old_inhabitant = bo[ob[piecex, piecey]][1]
-                    mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant)
+                    mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, bo, ob)
                     # check if move is legal
                     if mv.isthisallowed():
-                        piece.rect.x = piecex
-                        piece.rect.y = piecey
+                        if mv.noroadblocks():
+                            piece.rect.x = piecex
+                            piece.rect.y = piecey
 
-                        if old_inhabitant != None:# check if someone is there
-                            if piece.color != old_inhabitant.color:
-                                old_inhabitant.kill()
-                                # Check if killed piece was the King
-                                if old_inhabitant.name() == 'King':
-                                    game_over = True
-                                update(piece, piecex, piecey)
+                            if old_inhabitant != None:# check if someone is there
+                                if piece.color != old_inhabitant.color:
+                                    old_inhabitant.kill()
+                                    # Check if killed piece was the King
+                                    if old_inhabitant.name() == 'King':
+                                        game_over = True
+                                    update(piece, piecex, piecey)
+                                else:
+                                    go_home(piece)
+
                             else:
-                                go_home(piece)
-
+                                update(piece, piecex, piecey)
                         else:
-                            update(piece, piecex, piecey)
+                            go_home(piece)
                     else:
                         go_home(piece)
 

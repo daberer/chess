@@ -1,12 +1,6 @@
 import pygame
 
 WHITE = (255, 255, 255)
-GREEN = (20, 255, 140)
-
-centers = []
-for x in range(0, 700, 100):
-    for y in range(0, 700, 100):
-        centers.append((x,y))
 
 class Piece(pygame.sprite.Sprite):
     def __init__(self):
