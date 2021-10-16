@@ -3,8 +3,13 @@ import pygame
 WHITE = (255, 255, 255)
 
 class Piece(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, color, field):
         super().__init__()
+        self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
+        self.image.fill(WHITE)
+        self.image.set_colorkey(WHITE)
+        self.color = color
+        self.field = field
 
     def name(self):
         return self.__class__.__name__
@@ -13,12 +18,8 @@ class Pawn(Piece):
 
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
-        super().__init__()
-        self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
-        self.image.fill(WHITE)
-        self.image.set_colorkey(WHITE)
-        self.color = color
-        self.field = field
+        super().__init__(color, field)
+
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_pawn.png").convert_alpha()
@@ -36,12 +37,7 @@ class Pawn(Piece):
 class Knight(Piece):
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
-        super().__init__()
-        self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
-        self.image.fill(WHITE)
-        self.image.set_colorkey(WHITE)
-        self.color = color
-        self.field = field
+        super().__init__(color, field)
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_knight.png").convert_alpha()
@@ -57,12 +53,7 @@ class Bishop(Piece):
 
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
-        super().__init__()
-        self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
-        self.image.fill(WHITE)
-        self.image.set_colorkey(WHITE)
-        self.color = color
-        self.field = field
+        super().__init__(color, field)
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_bishop.png").convert_alpha()
@@ -77,14 +68,7 @@ class Rook(Piece):
 
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
-        super().__init__()
-
-        self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
-        self.image.fill(WHITE)
-        self.image.set_colorkey(WHITE)
-        self.color = color
-        self.field = field
-
+        super().__init__(color, field)
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_rook.png").convert_alpha()
         else:
@@ -99,13 +83,7 @@ class Queen(Piece):
 
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
-        super().__init__()
-
-        self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
-        self.image.fill(WHITE)
-        self.image.set_colorkey(WHITE)
-        self.color = color
-        self.field = field
+        super().__init__(color, field)
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_queen.png").convert_alpha()
@@ -120,13 +98,7 @@ class Queen(Piece):
 class King(Piece):
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
-        super().__init__()
-
-        self.image = pygame.Surface([10, 10], pygame.SRCALPHA, 16)
-        self.image.fill(WHITE)
-        self.image.set_colorkey(WHITE)
-        self.color = color
-        self.field = field
+        super().__init__(color, field)
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_king.png").convert_alpha()

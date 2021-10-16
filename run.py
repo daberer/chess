@@ -164,6 +164,7 @@ def go_home(piece):
     """
     piece.rect.x = bo[piece.field][0][0]
     piece.rect.y = bo[piece.field][0][1]
+    return False
 
 def update(piece, piecex, piecey):
     """
@@ -183,8 +184,100 @@ def update(piece, piecex, piecey):
     bo[ob[piecex, piecey]][1] = piece
     bo[piece.field][1] = None
     piece.field = ob[piecex, piecey]
+    return True
+
+def legal(mv, piece, piecex, piecey, old_inhabitant):
+    # check if move is legal
+        if mv.isthisallowed():
+            if mv.noroadblocks():
+                piece.rect.x = piecex
+                piece.rect.y = piecey
+
+                if old_inhabitant != None:# check if someone is there
+                    if piece.color != old_inhabitant.color:
+                        old_inhabitant.kill()
+                        return update(piece, piecex, piecey)
+                    else:
+                        return go_home(piece)
+                else:
+                    return update(piece, piecex, piecey)
+            else:
+                return go_home(piece)
+        else:
+            return go_home(piece)
+
+def execute_move(move_count, computer_move=True):
+    col = 'black'
+    if move_count % 2 == 0:
+        col = 'white'
+    if computer_move:
+        possible_pieces = []
+        for b in bo:
+            if bo[b][1] != None:
+                if bo[b][1].color == col:
+                    possible_pieces.append(bo[b][1])
+        piece = random.choice(possible_pieces)
+        possible_fields = []
+        for b in bo:
+            possible_fields.append(b)
+        while len(possible_fields):
+            goal = random.choice(possible_fields)
+            possible_fields.remove(goal)
+            old_inhabitant = bo[goal][1]
+            mv = Move(bo[piece.field][0], bo[goal][0], piece, old_inhabitant, bo, ob)
+            if legal(mv, piece, bo[goal][0][0], bo[goal][0][1], old_inhabitant):
+                return True
 
 
+    if len(pl.carry_pieces_list) > 0:
+        piece = pl.carry_pieces_list[0]
+        pl.carry_pieces_list = []
+
+        if move_count % 2 == 0 and piece.color == 'black':
+            go_home(piece)
+        elif move_count % 2 != 0 and piece.color == 'white':
+            go_home(piece)
+        piecex = round(piece.rect.x, -2)
+        piecey = round(piece.rect.y, -2)
+        old_inhabitant = bo[ob[piecex, piecey]][1]
+        mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, bo, ob)
+        return legal(mv, piece, piecex, piecey, old_inhabitant)
+
+
+
+
+
+def check_game_over():
+    two = 0
+    for s in  all_sprites_list.sprites():
+        if type(s) == King:
+            two += 1
+    if two == 2:
+        return False
+    return True
+
+
+def end_game():
+    color = None
+    for s in  all_sprites_list.sprites():
+        if type(s) == King:
+            color = s.color
+    text_surface = font.render(f'{color} wins!', True, (64, 224, 208))
+    screen.blit(text_surface, dest=(200,350))
+    pygame.display.flip()
+    import time
+    time.sleep(5)
+    pygame.quit()
+
+def draw_board():
+    for i, field in enumerate(fields):
+        if (i + int(i / 8)) % 2 == 0:
+            pygame.draw.rect(screen, DARK, pygame.Rect(field[0],field[1], 100,100))
+        else:
+            pygame.draw.rect(screen, LIGHT, pygame.Rect(field[0],field[1], 100,100))
+
+game_over = False
+move_count = 0
 
 while carryOn:
         for event in pygame.event.get():
@@ -196,47 +289,27 @@ while carryOn:
                 for i, block in enumerate(blocks_hit_list):
                     if block.name() == 'Player':
                         blocks_hit_list.pop(i)
-                pl.carry_pieces_list = blocks_hit_list
-
-
-
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if len(pl.carry_pieces_list) > 0:
-                    piece = pl.carry_pieces_list[0]
-                    piecex = round(piece.rect.x, -2)
-                    piecey = round(piece.rect.y, -2)
-                    old_inhabitant = bo[ob[piecex, piecey]][1]
-                    mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, bo, ob)
-                    # check if move is legal
-                    if mv.isthisallowed():
-                        if mv.noroadblocks():
-                            piece.rect.x = piecex
-                            piece.rect.y = piecey
-
-                            if old_inhabitant != None:# check if someone is there
-                                if piece.color != old_inhabitant.color:
-                                    old_inhabitant.kill()
-                                    # Check if killed piece was the King
-                                    if old_inhabitant.name() == 'King':
-                                        game_over = True
-                                    update(piece, piecex, piecey)
-                                else:
-                                    go_home(piece)
-
-                            else:
-                                update(piece, piecex, piecey)
-                        else:
-                            go_home(piece)
-                    else:
-                        go_home(piece)
-
-                    pl.carry_pieces_list = []
-
-            for i, field in enumerate(fields):
-                if (i + int(i / 8)) % 2 == 0:
-                    pygame.draw.rect(screen, DARK, pygame.Rect(field[0],field[1], 100,100))
+                # prevent more than one pieces from being picked up
+                if len(blocks_hit_list) > 1:
+                    pl.carry_pieces_list = [blocks_hit_list[0]]
                 else:
-                    pygame.draw.rect(screen, LIGHT, pygame.Rect(field[0],field[1], 100,100))
+                    pl.carry_pieces_list = blocks_hit_list
+
+
+
+            elif True: #event.type == pygame.MOUSEBUTTONUP:
+                import time
+                time.sleep(0.1)
+                correct_move = execute_move(move_count, computer_move=True)
+                if correct_move:
+                    move_count += 1
+                    game_over = check_game_over()
+
+
+
+            draw_board()
+
+
 
             all_sprites_list.update()
 
@@ -248,12 +321,8 @@ while carryOn:
             #Refresh Screen
             pygame.display.flip()
             if game_over:
-                text_surface = font.render(f'{piece.color} wins!', True, (64, 224, 208))
-                screen.blit(text_surface, dest=(200,350))
-                pygame.display.flip()
-                import time
-                time.sleep(5)
-                pygame.quit()
+                end_game()
+
             #Number of frames per secong e.g. 60
             clock.tick(200)
 

@@ -14,17 +14,8 @@ class Move():
 
 
 
-    # def isanyonehome(self, old_inhabitant):
-    #     if old_inhabitant != None:# check if someone is there
-    #         if self.piece.color != old_inhabitant.color:
-    #             old_inhabitant.kill()
-    #             # Check if killed piece was the King
-    #             if old_inhabitant.name() == 'King':
-    #                 return True
-
-
     def noroadblocks(self):
-        if self.piece.name() not in ['Bishop', 'Rook', 'Queen']:
+        if self.piece.name() not in ['Pawn', 'Bishop', 'Rook', 'Queen']:
             return True
         # diagonal = True
         # if round(self.dist % 100, 2) == 0:
@@ -34,19 +25,6 @@ class Move():
             if self.bo[block][1] != None:
                 return False
         return True
-
-        # if round(self.dist % 141.42, 2) == 0:
-        #     numb_of_steps = int(round(self.dist / 141.42, 0))
-        #     one_step = tuple(map(lambda i: i / numb_of_steps, self.diff))
-        #     for i in range(numb_of_steps-1):
-        #         step = tuple(map(lambda j: j * i, one_step))
-        #         self.add_two_tuples(self.old_field, step)
-
-
-
-
-
-
 
 
     def isthisallowed(self):
