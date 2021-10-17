@@ -174,7 +174,7 @@ def update(piece, piecex, piecey):
     :param piecey:
     :return:
     """
-    if (piece.color == 'white' and piecey == 0) or (piece.color == 'black' and piecey == 700):
+    if piece.name() == 'Pawn' and ((piece.color == 'white' and piecey == 0) or (piece.color == 'black' and piecey == 700)):
         field = piece.field
         piece.kill()
         piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
@@ -206,20 +206,71 @@ def legal(mv, piece, piecex, piecey, old_inhabitant):
         else:
             return go_home(piece)
 
-def execute_move(move_count, computer_move=True):
+def get_weights(p_name, col):
+    if p_name == 'Pawn' and col == 'white':
+        pass
+    elif p_name == 'Pawn' and col == 'black':
+        pass
+    elif p_name == 'Knight':
+        return ['D4', 'D4', 'D5', 'D5', 'E4', 'E4', 'E5', 'E5']
+    return []
+
+def worth_of_piece(piece):
+    if piece.name() == 'King':
+        return 2000
+    if piece.name() == 'Queen':
+        return 900
+    if piece.name() == 'Rook':
+        return 500
+    if piece.name() == 'Bishop':
+        return 301
+    if piece.name() == 'Knight':
+        return 300
+    if piece.name() == 'Pawn':
+        return 100
+
+def take_highest_value_piece(possible_pieces, enemy_pieces):
+    highest = [0, None, None, None, None]
+    for piece in possible_pieces:
+        for enemy in enemy_pieces:
+            mv = Move(bo[piece.field][0], bo[enemy.field][0], piece, enemy, bo, ob)
+            if mv.isthisallowed() and mv.noroadblocks():
+                net_worth = worth_of_piece(enemy)
+                if net_worth > highest[0]:
+                    highest = [worth_of_piece(enemy), piece, enemy, mv]
+    if highest[0] > 0:
+        return highest
+    return []
+
+
+def execute_move(move_count, computer_move=False):
     col = 'black'
     if move_count % 2 == 0:
         col = 'white'
     if computer_move:
-        possible_pieces = []
-        for b in bo:
-            if bo[b][1] != None:
-                if bo[b][1].color == col:
-                    possible_pieces.append(bo[b][1])
+
+        possible_pieces = [bo[b][1] for b in bo if bo[b][1] != None and bo[b][1].color == col]
+        enemy_pieces = [bo[b][1] for b in bo if bo[b][1] != None and bo[b][1].color != col]
+        VIP_target = take_highest_value_piece(possible_pieces, enemy_pieces)
+
+        if VIP_target:
+            legal(VIP_target[3], VIP_target[1], bo[VIP_target[2].field][0][0], bo[VIP_target[2].field][0][1], VIP_target[2])
+            return True
+
+
         piece = random.choice(possible_pieces)
-        possible_fields = []
-        for b in bo:
-            possible_fields.append(b)
+
+        possible_fields = [b for b in bo if not bo[b][1] or (bo[b][1] and bo[b][1].color != col)]
+
+
+        weights = get_weights(piece.name(), col)
+
+        if len(weights):
+            for way in weights:
+                possible_fields.insert(random.randint(0, len(possible_fields)), way)
+
+
+
         while len(possible_fields):
             goal = random.choice(possible_fields)
             possible_fields.remove(goal)
@@ -278,7 +329,7 @@ def draw_board():
 
 game_over = False
 move_count = 0
-
+auto = False
 while carryOn:
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
@@ -295,15 +346,23 @@ while carryOn:
                 else:
                     pl.carry_pieces_list = blocks_hit_list
 
+            elif event.type == pygame.MOUSEBUTTONUP:
+                correct_move = execute_move(move_count, computer_move=False)
+                if correct_move:
+                    move_count += 1
+                    game_over = check_game_over()
 
-
-            elif True: #event.type == pygame.MOUSEBUTTONUP:
+            if auto:
                 import time
-                time.sleep(0.1)
+                time.sleep(0.3)
                 correct_move = execute_move(move_count, computer_move=True)
                 if correct_move:
                     move_count += 1
                     game_over = check_game_over()
+
+
+
+
 
 
 
