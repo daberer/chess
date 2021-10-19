@@ -27,23 +27,25 @@ class Move():
         return True
 
 
-    def isthisallowed(self):
+    def isthisallowed(self, attack=None):
         if self.old_field == self.new_field:
             return False
         if self.piece.name() == 'Pawn':
-            return self.pawn()
+            return self.pawn(attack)
         if self.piece.name() == 'Knight':
-            return self.knight()
-        if self.piece.name() == 'Bishop':
-            return self.bishop()
+            return self.knight(attack)
+        if self.piece.name(attack) == 'Bishop':
+            return self.bishop(attack)
         if self.piece.name() == 'Rook':
-            return self.rook()
+            return self.rook(attack)
         if self.piece.name() == 'Queen':
-            return self.queen()
+            return self.queen(attack)
         if self.piece.name() == 'King':
-            return self.king()
+            return self.king(attack)
 
-    def pawn(self):
+    def pawn(self, attack=None):
+        if attack:
+            return self.pawn_attacked_fields()
         if not self.old_inhabitant:
             # move one or two fields with pawn
             self.move = [(0, 100)]
@@ -56,13 +58,15 @@ class Move():
                     return True
 
         # move pawn diagonally
-
         if self.dist == 141.42:
             if self.piece.color == 'white' and self.diff[1] > 0 and self.old_inhabitant:
                 return True
             if self.piece.color == 'black' and self.diff[1] < 0 and self.old_inhabitant:
                 return True
         return False
+
+    def pawn_attacked_fields(self):
+        pass
 
     def knight(self):
         # knight always hops the same distance..

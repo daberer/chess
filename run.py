@@ -2,6 +2,8 @@ import pygame, random
 import re
 from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
 from move import Move
+from check import Attacked_fields
+import numpy as np
 pygame.init()
 
 GREEN = (20, 255, 140)
@@ -85,9 +87,11 @@ def loc(str):
 #create board dict
 bo = {}
 ob = {}
+check = {}
 for x in range(1,9):
     for y in ['A','B','C','D','E','F','G','H']:
         bo[f"{y}{x}"] = [(loc(y + str(x))), None]
+        check[f"{y}{x}"] = 0
         ob[(loc(y + str(x)))] = f"{y}{x}"
 
 
@@ -178,7 +182,6 @@ def update(piece, piecex, piecey):
         field = piece.field
         piece.kill()
         piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
-
         all_sprites_list.add(piece)
 
     bo[ob[piecex, piecey]][1] = piece
@@ -216,6 +219,11 @@ def get_weights(p_name, col):
     return []
 
 def worth_of_piece(piece):
+    """
+    returns the value of each piece
+    :param piece: int, value of piece
+    :return:
+    """
     if piece.name() == 'King':
         return 2000
     if piece.name() == 'Queen':
@@ -229,7 +237,13 @@ def worth_of_piece(piece):
     if piece.name() == 'Pawn':
         return 100
 
-def take_highest_value_piece(possible_pieces, enemy_pieces):
+def find_best_move(possible_pieces, enemy_pieces):
+    """
+    tries to find the best move in iterations
+    :param possible_pieces:
+    :param enemy_pieces:
+    :return:
+    """
     highest = [0, None, None, None, None]
     for piece in possible_pieces:
         for enemy in enemy_pieces:
@@ -238,6 +252,7 @@ def take_highest_value_piece(possible_pieces, enemy_pieces):
                 net_worth = worth_of_piece(enemy)
                 if net_worth > highest[0]:
                     highest = [worth_of_piece(enemy), piece, enemy, mv]
+    # TODO: Next step: add one counter move by the other player -> will attack hanging pieces only (not protected)..?
     if highest[0] > 0:
         return highest
     return []
@@ -248,10 +263,9 @@ def execute_move(move_count, computer_move=False):
     if move_count % 2 == 0:
         col = 'white'
     if computer_move:
-
         possible_pieces = [bo[b][1] for b in bo if bo[b][1] != None and bo[b][1].color == col]
         enemy_pieces = [bo[b][1] for b in bo if bo[b][1] != None and bo[b][1].color != col]
-        VIP_target = take_highest_value_piece(possible_pieces, enemy_pieces)
+        VIP_target = find_best_move(possible_pieces, enemy_pieces)
 
         if VIP_target:
             legal(VIP_target[3], VIP_target[1], bo[VIP_target[2].field][0][0], bo[VIP_target[2].field][0][1], VIP_target[2])
@@ -294,8 +308,31 @@ def execute_move(move_count, computer_move=False):
         mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, bo, ob)
         return legal(mv, piece, piecex, piecey, old_inhabitant)
 
+def clear_dict(di):
+    return dict.fromkeys(di, 0)
+
+def nanify(di):
+    """
+    adapts dict to have nan values. Now each field can be checked if smaller than 2 (True if attacked by white or both)
+    or larger than 0 (True if attacked by black or both)
+    :param di:
+    :return:
+    """
+    for key, value in di.items():
+        if value == 0:
+            di[key] = np.nan
+    return di
 
 
+
+def recreate_checkdict(move_count, check_dict):
+    check_dict = clear_dict(check_dict)
+    attackers = [bo[b][1] for b in bo if bo[b][1] != None]
+    at = Attacked_fields(attackers, bo, ob, check_dict)
+    # find all attacked fields for attacker
+    check_dict = at.list_of_fields()
+    check_dict = nanify(check_dict)
+    return check_dict
 
 
 def check_game_over():
@@ -329,7 +366,8 @@ def draw_board():
 
 game_over = False
 move_count = 0
-auto = False
+recreate_checkdict(move_count=move_count, check_dict=check)
+auto = True
 while carryOn:
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
@@ -352,18 +390,13 @@ while carryOn:
                     move_count += 1
                     game_over = check_game_over()
 
-            if auto:
+            if move_count % 2!= 0:
                 import time
-                time.sleep(0.3)
+                time.sleep(0.1)
                 correct_move = execute_move(move_count, computer_move=True)
                 if correct_move:
                     move_count += 1
                     game_over = check_game_over()
-
-
-
-
-
 
 
             draw_board()

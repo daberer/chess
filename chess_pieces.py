@@ -15,7 +15,6 @@ class Piece(pygame.sprite.Sprite):
         return self.__class__.__name__
 
 class Pawn(Piece):
-
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__(color, field)
@@ -29,8 +28,6 @@ class Pawn(Piece):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
-
-
 
 
 
