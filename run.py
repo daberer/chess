@@ -3,7 +3,7 @@ import re
 from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
 from move import Move
 from check import Attacked_fields
-import numpy as np
+
 pygame.init()
 
 GREEN = (20, 255, 140)
@@ -311,17 +311,7 @@ def execute_move(move_count, computer_move=False):
 def clear_dict(di):
     return dict.fromkeys(di, 0)
 
-def nanify(di):
-    """
-    adapts dict to have nan values. Now each field can be checked if smaller than 2 (True if attacked by white or both)
-    or larger than 0 (True if attacked by black or both)
-    :param di:
-    :return:
-    """
-    for key, value in di.items():
-        if value == 0:
-            di[key] = np.nan
-    return di
+
 
 
 
@@ -331,7 +321,6 @@ def recreate_checkdict(move_count, check_dict):
     at = Attacked_fields(attackers, bo, ob, check_dict)
     # find all attacked fields for attacker
     check_dict = at.list_of_fields()
-    check_dict = nanify(check_dict)
     return check_dict
 
 

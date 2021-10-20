@@ -65,8 +65,6 @@ class Move():
                 return True
         return False
 
-    def pawn_attacked_fields(self):
-        pass
 
     def knight(self):
         # knight always hops the same distance..
