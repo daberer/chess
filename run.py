@@ -15,7 +15,7 @@ BLACK = (0,0,0)
 LIGHT = (242,218,182)
 DARK = (181,135,99)
 
-#TODO: fix fen set up (Queen and King are set conversly)
+#TODO: fix fen set up (Queen and King are set conversly) or are they correct and the fen code was wrong?
 start_fen = 'rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR'
 #start_fen = "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR"
 
@@ -247,7 +247,7 @@ def find_best_move(possible_pieces, enemy_pieces):
     highest = [0, None, None, None, None]
     for piece in possible_pieces:
         for enemy in enemy_pieces:
-            mv = Move(bo[piece.field][0], bo[enemy.field][0], piece, enemy, bo, ob)
+            mv = Move(bo[piece.field][0], bo[enemy.field][0], piece, enemy, bo, ob, check)
             if mv.isthisallowed() and mv.noroadblocks():
                 net_worth = worth_of_piece(enemy)
                 if net_worth > highest[0]:
@@ -259,6 +259,7 @@ def find_best_move(possible_pieces, enemy_pieces):
 
 
 def execute_move(move_count, computer_move=False):
+    check_dict = recreate_checkdict()
     col = 'black'
     if move_count % 2 == 0:
         col = 'white'
@@ -305,7 +306,7 @@ def execute_move(move_count, computer_move=False):
         piecex = round(piece.rect.x, -2)
         piecey = round(piece.rect.y, -2)
         old_inhabitant = bo[ob[piecex, piecey]][1]
-        mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, bo, ob)
+        mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, bo, ob, check_dict)
         return legal(mv, piece, piecex, piecey, old_inhabitant)
 
 def clear_dict(di):
@@ -313,10 +314,8 @@ def clear_dict(di):
 
 
 
-
-
-def recreate_checkdict(move_count, check_dict):
-    check_dict = clear_dict(check_dict)
+def recreate_checkdict():
+    check_dict = clear_dict(check)
     attackers = [bo[b][1] for b in bo if bo[b][1] != None]
     at = Attacked_fields(attackers, bo, ob, check_dict)
     # find all attacked fields for attacker
@@ -355,8 +354,8 @@ def draw_board():
 
 game_over = False
 move_count = 0
-recreate_checkdict(move_count=move_count, check_dict=check)
-auto = True
+check = recreate_checkdict()
+auto = False
 while carryOn:
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
@@ -379,13 +378,13 @@ while carryOn:
                     move_count += 1
                     game_over = check_game_over()
 
-            if move_count % 2!= 0:
-                import time
-                time.sleep(0.1)
-                correct_move = execute_move(move_count, computer_move=True)
-                if correct_move:
-                    move_count += 1
-                    game_over = check_game_over()
+            # if move_count % 2!= 0:
+            #     import time
+            #     time.sleep(0.1)
+            #     correct_move = execute_move(move_count, computer_move=True)
+            #     if correct_move:
+            #         move_count += 1
+            #         game_over = check_game_over()
 
 
             draw_board()

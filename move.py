@@ -1,7 +1,7 @@
 import math
 
 class Move():
-    def __init__(self, old_field, new_field, piece, old_inhabitant, bo, ob):
+    def __init__(self, old_field, new_field, piece, old_inhabitant, bo, ob, check_dict=None):
         self.old_field = old_field
         self.new_field = new_field
         self.piece = piece
@@ -11,6 +11,7 @@ class Move():
         self.old_inhabitant = old_inhabitant
         self.bo = bo
         self.ob = ob
+        self.check_dict = check_dict
 
 
 
@@ -27,25 +28,23 @@ class Move():
         return True
 
 
-    def isthisallowed(self, attack=None):
+    def isthisallowed(self, check_dict=None):
         if self.old_field == self.new_field:
             return False
         if self.piece.name() == 'Pawn':
-            return self.pawn(attack)
+            return self.pawn()
         if self.piece.name() == 'Knight':
-            return self.knight(attack)
-        if self.piece.name(attack) == 'Bishop':
-            return self.bishop(attack)
+            return self.knight()
+        if self.piece.name() == 'Bishop':
+            return self.bishop()
         if self.piece.name() == 'Rook':
-            return self.rook(attack)
+            return self.rook()
         if self.piece.name() == 'Queen':
-            return self.queen(attack)
+            return self.queen()
         if self.piece.name() == 'King':
-            return self.king(attack)
+            return self.king()
 
-    def pawn(self, attack=None):
-        if attack:
-            return self.pawn_attacked_fields()
+    def pawn(self):
         if not self.old_inhabitant:
             # move one or two fields with pawn
             self.move = [(0, 100)]
@@ -89,7 +88,10 @@ class Move():
 
     def king(self):
         if self.dist == 141.42 or self.dist == 100:
-            return True
+            if self.piece.color == 'black' and not self.check_dict[self.ob[self.new_field]] in [-1, 1]:
+                return True
+            if self.piece.color == 'white' and not self.check_dict[self.ob[self.new_field]] in [1, 2]:
+                return True
         return False
 
     ########### helper functions
