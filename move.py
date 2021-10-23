@@ -14,6 +14,11 @@ class Move():
         self.check_dict = check_dict
 
 
+    def update_check_dict(self, up_dict):
+        self.check_dict = up_dict
+
+    def get_bo(self):
+        return self.bo
 
     def noroadblocks(self):
         if self.piece.name() not in ['Pawn', 'Bishop', 'Rook', 'Queen']:
@@ -87,6 +92,10 @@ class Move():
         return False
 
     def king(self):
+        """
+        king may move one field and then only to fields where the check_dict says no attacker is pointing at.
+        :return:
+        """
         if self.dist == 141.42 or self.dist == 100:
             if self.piece.color == 'black' and not self.check_dict[self.ob[self.new_field]] in [-1, 1]:
                 return True
@@ -128,5 +137,6 @@ class Move():
             ret = [let[i] + num[i] for i in range(len(num))]
 
         return ret
+
 
 

@@ -3,6 +3,8 @@ import re
 from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
 from move import Move
 from check import Attacked_fields
+from game_over import Check_game_over
+from utils import Board
 
 pygame.init()
 
@@ -85,6 +87,7 @@ def loc(str):
     return ((ord(cha)-65))*100, 800-int(num)*100
 
 #create board dict
+bd = Board({})
 bo = {}
 ob = {}
 check = {}
@@ -93,6 +96,8 @@ for x in range(1,9):
         bo[f"{y}{x}"] = [(loc(y + str(x))), None]
         check[f"{y}{x}"] = 0
         ob[(loc(y + str(x)))] = f"{y}{x}"
+
+bd.update_bo(bo)
 
 
 
@@ -134,13 +139,14 @@ start_fen = start_fen.replace('/','')
 start_fen = extend_fen(start_fen)
 start_fen = start_fen[::-1]
 
+bo = bd.get_bo()
 for i, field in enumerate(bo):
     co, ty = fen_code(start_fen[i])
     if ty is not None:
         piece = set_up_piece(co, bo[field][0], ty, field)
         bo[field][1] = piece
         all_sprites_list.add(piece)
-
+bd.update_bo(bo)
 
 
 #Allowing the user to close the window...
@@ -184,8 +190,10 @@ def update(piece, piecex, piecey):
         piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
         all_sprites_list.add(piece)
 
+    bo = bd.get_bo()
     bo[ob[piecex, piecey]][1] = piece
     bo[piece.field][1] = None
+    bd.update_bo(bo)
     piece.field = ob[piecex, piecey]
     return True
 
@@ -305,21 +313,23 @@ def execute_move(move_count, computer_move=False):
             go_home(piece)
         piecex = round(piece.rect.x, -2)
         piecey = round(piece.rect.y, -2)
+        bo = bd.get_bo()
         old_inhabitant = bo[ob[piecex, piecey]][1]
         mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, bo, ob, check_dict)
-        return legal(mv, piece, piecex, piecey, old_inhabitant)
+        ret = legal(mv, piece, piecex, piecey, old_inhabitant)
+        check_dict2 = recreate_checkdict()
+        go = Check_game_over(check_dict2, piece.color, mv.get_bo(), ob)
+        return ret, go.checkmate()
 
-def clear_dict(di):
-    return dict.fromkeys(di, 0)
+
 
 
 
 def recreate_checkdict():
-    check_dict = clear_dict(check)
-    attackers = [bo[b][1] for b in bo if bo[b][1] != None]
-    at = Attacked_fields(attackers, bo, ob, check_dict)
+    bo = bd.get_bo()
+    at = Attacked_fields(bo, ob, check)
     # find all attacked fields for attacker
-    check_dict = at.list_of_fields()
+    check_dict = at.get_dict_of_fields()
     return check_dict
 
 
@@ -333,11 +343,11 @@ def check_game_over():
     return True
 
 
-def end_game():
-    color = None
-    for s in  all_sprites_list.sprites():
-        if type(s) == King:
-            color = s.color
+def end_game(move_count):
+    if move_count % 2 == 0:
+        color = 'White'
+    else:
+        color = 'Black'
     text_surface = font.render(f'{color} wins!', True, (64, 224, 208))
     screen.blit(text_surface, dest=(200,350))
     pygame.display.flip()
@@ -373,10 +383,10 @@ while carryOn:
                     pl.carry_pieces_list = blocks_hit_list
 
             elif event.type == pygame.MOUSEBUTTONUP:
-                correct_move = execute_move(move_count, computer_move=False)
+                correct_move, game_over = execute_move(move_count, computer_move=False)
                 if correct_move:
                     move_count += 1
-                    game_over = check_game_over()
+
 
             # if move_count % 2!= 0:
             #     import time
@@ -401,7 +411,7 @@ while carryOn:
             #Refresh Screen
             pygame.display.flip()
             if game_over:
-                end_game()
+                end_game(move_count -1)
 
             #Number of frames per secong e.g. 60
             clock.tick(200)

@@ -1,15 +1,19 @@
 import numpy as np
 
 class Attacked_fields():
-    def __init__(self, attackers, bo, ob, di):
-        self.attackers = attackers
+    def __init__(self, bo, ob, di):
+        self.attackers = [bo[b][1] for b in bo if bo[b][1] != None]
         self.di = di
         self.bo = bo
         self.ob = ob
         self.piece = None
 
+    def clear_dict(self):
+        self.di =  dict.fromkeys(self.di, 0)
 
-    def list_of_fields(self):
+
+    def get_dict_of_fields(self):
+        self.clear_dict()
         self.black_attackfields = []
         self.white_attackfields = []
         for piece in self.attackers:
