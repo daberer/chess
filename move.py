@@ -33,7 +33,7 @@ class Move():
         return True
 
 
-    def isthisallowed(self, check_dict=None):
+    def isthisallowed(self):
         if self.old_field == self.new_field:
             return False
         if self.piece.name() == 'Pawn':

@@ -1,10 +1,10 @@
 import pygame, random
 import re
-from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
+from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player, set_up_piece, update
 from move import Move
 from check import Attacked_fields
 from game_over import Check_game_over
-from utils import Board
+import utils
 
 pygame.init()
 
@@ -30,14 +30,9 @@ pygame.display.set_caption("Chess")
 font = pygame.font.SysFont(None, 100)
 
 #This will be a list that will contain all the sprites we intend to use in our game.
-all_sprites_list = pygame.sprite.Group()
+utils.all_sprites_list = pygame.sprite.Group()
 
-#Set up pieces
-def set_up_piece(color, coordinate_tuple, kind, field):
-    piece = kind(color, field)
-    piece.rect.x = coordinate_tuple[0]
-    piece.rect.y = coordinate_tuple[1]
-    return piece
+
 
 #translate field into x,y
 def fen_code(sign):
@@ -71,33 +66,6 @@ def fen_code(sign):
 
     return col, ret
 
-
-
-def loc(str):
-    """
-    translates string containing name of field into coordinates
-    :param str: string of length two, containing char and number ("A1")
-    :return:
-    x and y coordinates each ranging from 0 - 700 in steps of 100.
-    H1 is 0,0, A8 is 700,700
-    """
-    assert(len(str)==2)
-    cha = list(str)[0]
-    num = list(str)[1]
-    return ((ord(cha)-65))*100, 800-int(num)*100
-
-#create board dict
-bd = Board({})
-bo = {}
-ob = {}
-check = {}
-for x in range(1,9):
-    for y in ['A','B','C','D','E','F','G','H']:
-        bo[f"{y}{x}"] = [(loc(y + str(x))), None]
-        check[f"{y}{x}"] = 0
-        ob[(loc(y + str(x)))] = f"{y}{x}"
-
-bd.update_bo(bo)
 
 
 
@@ -139,14 +107,14 @@ start_fen = start_fen.replace('/','')
 start_fen = extend_fen(start_fen)
 start_fen = start_fen[::-1]
 
-bo = bd.get_bo()
-for i, field in enumerate(bo):
+
+for i, field in enumerate(utils.bo):
     co, ty = fen_code(start_fen[i])
     if ty is not None:
-        piece = set_up_piece(co, bo[field][0], ty, field)
-        bo[field][1] = piece
-        all_sprites_list.add(piece)
-bd.update_bo(bo)
+        piece = set_up_piece(co, utils.bo[field][0], ty, field)
+        utils.bo[field][1] = piece
+        utils.all_sprites_list.add(piece)
+
 
 
 #Allowing the user to close the window...
@@ -154,7 +122,7 @@ carryOn = True
 clock=pygame.time.Clock()
 score = 0
 pl = Player()
-all_sprites_list.add(pl)
+utils.all_sprites_list.add(pl)
 
 
 #Drawing on Screen
@@ -172,30 +140,11 @@ def go_home(piece):
     :param piece:
     :return:
     """
-    piece.rect.x = bo[piece.field][0][0]
-    piece.rect.y = bo[piece.field][0][1]
+    piece.rect.x = utils.bo[piece.field][0][0]
+    piece.rect.y = utils.bo[piece.field][0][1]
     return False
 
-def update(piece, piecex, piecey):
-    """
-    Update dictionary with positions
-    :param piece:
-    :param piecex:
-    :param piecey:
-    :return:
-    """
-    if piece.name() == 'Pawn' and ((piece.color == 'white' and piecey == 0) or (piece.color == 'black' and piecey == 700)):
-        field = piece.field
-        piece.kill()
-        piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
-        all_sprites_list.add(piece)
 
-    bo = bd.get_bo()
-    bo[ob[piecex, piecey]][1] = piece
-    bo[piece.field][1] = None
-    bd.update_bo(bo)
-    piece.field = ob[piecex, piecey]
-    return True
 
 def legal(mv, piece, piecex, piecey, old_inhabitant):
     # check if move is legal
@@ -255,7 +204,7 @@ def find_best_move(possible_pieces, enemy_pieces):
     highest = [0, None, None, None, None]
     for piece in possible_pieces:
         for enemy in enemy_pieces:
-            mv = Move(bo[piece.field][0], bo[enemy.field][0], piece, enemy, bo, ob, check)
+            mv = Move(utils.bo[piece.field][0], utils.bo[enemy.field][0], piece, enemy, utils.bo, utils.ob, utils.check)
             if mv.isthisallowed() and mv.noroadblocks():
                 net_worth = worth_of_piece(enemy)
                 if net_worth > highest[0]:
@@ -267,23 +216,23 @@ def find_best_move(possible_pieces, enemy_pieces):
 
 
 def execute_move(move_count, computer_move=False):
-    check_dict = recreate_checkdict()
+    recreate_checkdict()
     col = 'black'
     if move_count % 2 == 0:
         col = 'white'
     if computer_move:
-        possible_pieces = [bo[b][1] for b in bo if bo[b][1] != None and bo[b][1].color == col]
-        enemy_pieces = [bo[b][1] for b in bo if bo[b][1] != None and bo[b][1].color != col]
+        possible_pieces = [utils.bo[b][1] for b in utils.bo if utils.bo[b][1] != None and utils.bo[b][1].color == col]
+        enemy_pieces = [utils.bo[b][1] for b in utils.bo if utils.bo[b][1] != None and utils.bo[b][1].color != col]
         VIP_target = find_best_move(possible_pieces, enemy_pieces)
 
         if VIP_target:
-            legal(VIP_target[3], VIP_target[1], bo[VIP_target[2].field][0][0], bo[VIP_target[2].field][0][1], VIP_target[2])
+            legal(VIP_target[3], VIP_target[1], utils.bo[VIP_target[2].field][0][0], utils.bo[VIP_target[2].field][0][1], VIP_target[2])
             return True
 
 
         piece = random.choice(possible_pieces)
 
-        possible_fields = [b for b in bo if not bo[b][1] or (bo[b][1] and bo[b][1].color != col)]
+        possible_fields = [b for b in utils.bo if not utils.bo[b][1] or (utils.bo[b][1] and utils.bo[b][1].color != col)]
 
 
         weights = get_weights(piece.name(), col)
@@ -297,9 +246,9 @@ def execute_move(move_count, computer_move=False):
         while len(possible_fields):
             goal = random.choice(possible_fields)
             possible_fields.remove(goal)
-            old_inhabitant = bo[goal][1]
-            mv = Move(bo[piece.field][0], bo[goal][0], piece, old_inhabitant, bo, ob)
-            if legal(mv, piece, bo[goal][0][0], bo[goal][0][1], old_inhabitant):
+            old_inhabitant = utils.bo[goal][1]
+            mv = Move(utils.bo[piece.field][0], utils.bo[goal][0], piece, old_inhabitant, utils.bo, utils.ob)
+            if legal(mv, piece, utils.bo[goal][0][0], utils.bo[goal][0][1], old_inhabitant):
                 return True
 
 
@@ -313,12 +262,12 @@ def execute_move(move_count, computer_move=False):
             go_home(piece)
         piecex = round(piece.rect.x, -2)
         piecey = round(piece.rect.y, -2)
-        bo = bd.get_bo()
-        old_inhabitant = bo[ob[piecex, piecey]][1]
-        mv = Move(bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, bo, ob, check_dict)
+
+        old_inhabitant = utils.bo[utils.ob[piecex, piecey]][1]
+        mv = Move(utils.bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, utils.bo, utils.ob, utils.check)
         ret = legal(mv, piece, piecex, piecey, old_inhabitant)
-        check_dict2 = recreate_checkdict()
-        go = Check_game_over(check_dict2, piece.color, mv.get_bo(), ob)
+        recreate_checkdict()
+        go = Check_game_over(piece.color)
         return ret, go.checkmate()
 
 
@@ -326,16 +275,15 @@ def execute_move(move_count, computer_move=False):
 
 
 def recreate_checkdict():
-    bo = bd.get_bo()
-    at = Attacked_fields(bo, ob, check)
+    at = Attacked_fields(utils.bo, utils.ob, utils.check)
     # find all attacked fields for attacker
-    check_dict = at.get_dict_of_fields()
-    return check_dict
+    utils.check = at.get_dict_of_fields()
+
 
 
 def check_game_over():
     two = 0
-    for s in  all_sprites_list.sprites():
+    for s in  utils.all_sprites_list.sprites():
         if type(s) == King:
             two += 1
     if two == 2:
@@ -364,7 +312,7 @@ def draw_board():
 
 game_over = False
 move_count = 0
-check = recreate_checkdict()
+recreate_checkdict()
 auto = False
 while carryOn:
         for event in pygame.event.get():
@@ -372,7 +320,7 @@ while carryOn:
                  carryOn=False
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                blocks_hit_list = pygame.sprite.spritecollide(pl, all_sprites_list, False)
+                blocks_hit_list = pygame.sprite.spritecollide(pl, utils.all_sprites_list, False)
                 for i, block in enumerate(blocks_hit_list):
                     if block.name() == 'Player':
                         blocks_hit_list.pop(i)
@@ -383,9 +331,12 @@ while carryOn:
                     pl.carry_pieces_list = blocks_hit_list
 
             elif event.type == pygame.MOUSEBUTTONUP:
-                correct_move, game_over = execute_move(move_count, computer_move=False)
+                correct_move, check_status = execute_move(move_count, computer_move=False)
+                game_over, check_given = check_status
                 if correct_move:
                     move_count += 1
+                if check_given:
+                    print('Check')
 
 
             # if move_count % 2!= 0:
@@ -401,12 +352,12 @@ while carryOn:
 
 
 
-            all_sprites_list.update()
+            utils.all_sprites_list.update()
 
 
 
             #Now let's draw all the sprites in one go.
-            all_sprites_list.draw(screen)
+            utils.all_sprites_list.draw(screen)
 
             #Refresh Screen
             pygame.display.flip()
