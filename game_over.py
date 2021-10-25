@@ -1,7 +1,7 @@
 from move import Move
 from check import Attacked_fields
 import utils
-from chess_pieces import update
+from chess_pieces import update, set_up_piece
 import copy
 
 
@@ -49,9 +49,9 @@ class Check_game_over():
         return False
 
     def king_in_check(self):
-        if self.king.color == 'black' and utils.intercept_bo[self.king.field] not in [-1, 1]:
+        if self.king.color == 'black' and utils.check[self.king.field] not in [-1, 1]:
             return False
-        if self.king.color == 'white' and utils.intercept_bo[self.king.field] not in [1, 2]:
+        if self.king.color == 'white' and utils.check[self.king.field] not in [1, 2]:
             return False
         return True
 
@@ -73,6 +73,7 @@ class Check_game_over():
         enemies = [utils.bo[b][1] for b in utils.bo if utils.bo[b][1] != None and utils.bo[b][1].color != col]
         empty_fields = [b for b in utils.bo.keys() if utils.bo[b][1] == None]
         for interceptor in interceptors:
+            origin = interceptor.field
             #check if someone on my team an kill someone of theirs to save the king
             for enemy in enemies:
                 go_back_to_bo()
@@ -80,25 +81,32 @@ class Check_game_over():
                           utils.check)
                 # look if we can take down piece
                 if mv.isthisallowed() and mv.noroadblocks():
+                    utils.intercept_bo[enemy.field][1] = None
+                    # TODO: Bug utils.bo == utils.intercept_bo
                     update(interceptor, utils.bo[interceptor.field][0][0], utils.bo[interceptor.field][0][1],intercept=True)
                     at = Attacked_fields(utils.intercept_bo, utils.ob, utils.check)
                     # find all attacked fields
                     utils.check = at.get_dict_of_fields()
-                    # TODO: Fix Bug, black pawn goes from F5 to F4 intercepting check.
+                    #piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
+                    update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
+                    go_back_to_bo()
                     if not self.king_in_check():
                         return True
 
         for interceptor in interceptors:
+            origin = interceptor.field
             # Hail mary
             for field in empty_fields:
                 go_back_to_bo()
                 mv = Move(utils.bo[interceptor.field][0], utils.bo[field][0], interceptor, None, utils.bo, utils.ob,
                           utils.check)
                 if mv.isthisallowed() and mv.noroadblocks():
-                    update(interceptor, utils.bo[interceptor.field][0][0], utils.bo[interceptor.field][0][1],
+                    update(interceptor, utils.bo[field][0][0], utils.bo[field][0][1],
                        intercept=True)
                     at = Attacked_fields(utils.intercept_bo, utils.ob, utils.check)
                     utils.check = at.get_dict_of_fields()
+                    # put interceptor back where he was so that his field does not change for loop
+                    update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
                     if not self.king_in_check():
                         return True
         return False
@@ -124,7 +132,8 @@ class Check_game_over():
                 if not self.interception():
                     return True, True
                 else:
-                    return True, False
+                    #not checkmate but check given
+                    return False, True
         return False, False
 
 

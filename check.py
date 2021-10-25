@@ -9,7 +9,7 @@ class Attacked_fields():
         self.piece = None
 
     def clear_dict(self):
-        self.di =  dict.fromkeys(self.di, 0)
+        self.di = dict.fromkeys(self.di, 0)
 
 
     def get_dict_of_fields(self):
