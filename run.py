@@ -1,6 +1,6 @@
 import pygame, random
 import re
-from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player, set_up_piece, update
+from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
 from move import Move
 from check import Attacked_fields
 from game_over import Check_game_over
@@ -111,7 +111,7 @@ start_fen = start_fen[::-1]
 for i, field in enumerate(utils.bo):
     co, ty = fen_code(start_fen[i])
     if ty is not None:
-        piece = set_up_piece(co, utils.bo[field][0], ty, field)
+        piece = utils.set_up_piece(co, utils.bo[field][0], ty, field)
         utils.bo[field][1] = piece
         utils.all_sprites_list.add(piece)
 
@@ -147,24 +147,38 @@ def go_home(piece):
 
 
 def legal(mv, piece, piecex, piecey, old_inhabitant):
+    """
+    checks if move is according to the allowed move patterns for each piece (isthisallowed)
+    checks if no pieces are on the way to the new field (noroadbloacks)
+    checks if a given check is being countered (escape_check)
+    :param mv: move class
+    :param piece: Chess piece that is moving (Class from chess-pieces)
+    :param piecex: x coordinate of new field
+    :param piecey: y coordinate of new field
+    :param old_inhabitant: piece or None, occupying the new field
+    :return:
+    """
     # check if move is legal
-        if mv.isthisallowed():
-            if mv.noroadblocks():
+    if mv.isthisallowed():
+        if mv.noroadblocks():
+            if utils.escape_check(piece, mv):
                 piece.rect.x = piecex
                 piece.rect.y = piecey
 
                 if old_inhabitant != None:# check if someone is there
                     if piece.color != old_inhabitant.color:
                         old_inhabitant.kill()
-                        return update(piece, piecex, piecey)
+                        return utils.update(piece, piecex, piecey, False, Queen)
                     else:
                         return go_home(piece)
                 else:
-                    return update(piece, piecex, piecey)
+                    return utils.update(piece, piecex, piecey, False, Queen)
             else:
                 return go_home(piece)
         else:
             return go_home(piece)
+    else:
+        return go_home(piece)
 
 def get_weights(p_name, col):
     if p_name == 'Pawn' and col == 'white':
@@ -337,6 +351,10 @@ while carryOn:
                     move_count += 1
                 if check_given:
                     print('Check')
+                    utils.check_given = True
+                else:
+                    utils.check_given = False
+
 
 
             # if move_count % 2!= 0:

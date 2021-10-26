@@ -1,25 +1,12 @@
 from move import Move
 from check import Attacked_fields
 import utils
-from chess_pieces import update, set_up_piece
 import copy
 
 
 class Check_game_over():
     def __init__(self, col):
         self.color = col
-
-
-
-
-    def find_king(self):
-        self.king = ''
-        vals = list(utils.bo.values())
-        for k,j in vals:
-            if j:
-                if j.name() == 'King':
-                    if j.color != self.color:
-                        self.king = j
 
 
 
@@ -48,7 +35,14 @@ class Check_game_over():
                     return True
         return False
 
-    def king_in_check(self):
+    def king_in_check(self, king=None):
+        """
+        see if king is in check according to the utils.check dictionary.
+        :param king: Object of chess_pieces.King class, makes code reuseable.
+        :return:
+        """
+        if king:
+            self.king = king
         if self.king.color == 'black' and utils.check[self.king.field] not in [-1, 1]:
             return False
         if self.king.color == 'white' and utils.check[self.king.field] not in [1, 2]:
@@ -81,14 +75,12 @@ class Check_game_over():
                           utils.check)
                 # look if we can take down piece
                 if mv.isthisallowed() and mv.noroadblocks():
-                    utils.intercept_bo[enemy.field][1] = None
-                    # TODO: Bug utils.bo == utils.intercept_bo
-                    update(interceptor, utils.bo[interceptor.field][0][0], utils.bo[interceptor.field][0][1],intercept=True)
+                    utils.update(interceptor, utils.bo[interceptor.field][0][0], utils.bo[interceptor.field][0][1],intercept=True)
                     at = Attacked_fields(utils.intercept_bo, utils.ob, utils.check)
-                    # find all attacked fields
-                    utils.check = at.get_dict_of_fields()
+                    # find all attacked fields but exclude the "taken" enemy
+                    utils.check = at.get_dict_of_fields((enemy.name(), enemy.field))
                     #piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
-                    update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
+                    utils.update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
                     go_back_to_bo()
                     if not self.king_in_check():
                         return True
@@ -101,12 +93,12 @@ class Check_game_over():
                 mv = Move(utils.bo[interceptor.field][0], utils.bo[field][0], interceptor, None, utils.bo, utils.ob,
                           utils.check)
                 if mv.isthisallowed() and mv.noroadblocks():
-                    update(interceptor, utils.bo[field][0][0], utils.bo[field][0][1],
+                    utils.update(interceptor, utils.bo[field][0][0], utils.bo[field][0][1],
                        intercept=True)
                     at = Attacked_fields(utils.intercept_bo, utils.ob, utils.check)
                     utils.check = at.get_dict_of_fields()
                     # put interceptor back where he was so that his field does not change for loop
-                    update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
+                    utils.update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
                     if not self.king_in_check():
                         return True
         return False
@@ -119,7 +111,7 @@ class Check_game_over():
         returns True if check mate
         :return:
         """
-        self.find_king()
+        self.king = utils.find_king(self.color)
         check = False
         if self.king.color == 'black' and utils.check[self.king.field] in [-1,2]:
             check = True
@@ -131,10 +123,10 @@ class Check_game_over():
             if not self.run_away():
                 if not self.interception():
                     return True, True
-                else:
-                    #not checkmate but check given
-                    return False, True
-        return False, False
+            return False, True
+        else:
+            return False, False
+
 
 
 

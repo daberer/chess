@@ -12,11 +12,14 @@ class Attacked_fields():
         self.di = dict.fromkeys(self.di, 0)
 
 
-    def get_dict_of_fields(self):
+    def get_dict_of_fields(self, exclude=None):
         self.clear_dict()
         self.black_attackfields = []
         self.white_attackfields = []
         for piece in self.attackers:
+            if (piece.name(), piece.field) == exclude:
+                print('queen')
+                continue
             self.piece = piece
             if self.piece.color == 'black':
                 ret = self.find_fields_for_piece()

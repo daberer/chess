@@ -1,4 +1,6 @@
 import math
+import utils
+
 
 class Move():
     def __init__(self, old_field, new_field, piece, old_inhabitant, bo, ob, check_dict=None):
@@ -17,8 +19,12 @@ class Move():
     def update_check_dict(self, up_dict):
         self.check_dict = up_dict
 
-    def get_bo(self):
-        return self.bo
+
+
+
+
+
+
 
     def noroadblocks(self):
         if self.piece.name() not in ['Pawn', 'Bishop', 'Rook', 'Queen']:

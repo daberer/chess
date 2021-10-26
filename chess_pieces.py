@@ -3,38 +3,7 @@ import utils
 WHITE = (255, 255, 255)
 
 
-#Set up pieces
-def set_up_piece(color, coordinate_tuple, kind, field):
-    piece = kind(color, field)
-    piece.rect.x = coordinate_tuple[0]
-    piece.rect.y = coordinate_tuple[1]
-    return piece
 
-def update(piece, piecex, piecey, intercept=False):
-    """
-    Update dictionary with positions
-    :param piece:
-    :param piecex:
-    :param piecey:
-    :param intercept: if the updated dict is a hypothetical dict not real board
-    :return:
-    """
-    if piece.name() == 'Pawn' and ((piece.color == 'white' and piecey == 0) or (piece.color == 'black' and piecey == 700)):
-        field = piece.field
-        piece.kill()
-        piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
-        utils.all_sprites_list.add(piece)
-
-
-    if intercept:
-        utils.intercept_bo[utils.ob[piecex, piecey]][1] = piece
-        utils.intercept_bo[piece.field][1] = None
-        piece.field = utils.ob[piecex, piecey]
-    else:
-        utils.bo[utils.ob[piecex, piecey]][1] = piece
-        utils.bo[piece.field][1] = None
-        piece.field = utils.ob[piecex, piecey]
-        return True
 
 class Piece(pygame.sprite.Sprite):
     def __init__(self, color, field):
