@@ -76,7 +76,7 @@ class Check_game_over():
                 # look if we can take down piece
                 if mv.isthisallowed() and mv.noroadblocks():
                     utils.update(interceptor, utils.bo[interceptor.field][0][0], utils.bo[interceptor.field][0][1],intercept=True)
-                    at = Attacked_fields(utils.intercept_bo, utils.ob, utils.check)
+                    at = Attacked_fields(utils.intercept_bo, utils.ob)
                     # find all attacked fields but exclude the "taken" enemy
                     utils.check = at.get_dict_of_fields((enemy.name(), enemy.field))
                     #piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
@@ -95,7 +95,7 @@ class Check_game_over():
                 if mv.isthisallowed() and mv.noroadblocks():
                     utils.update(interceptor, utils.bo[field][0][0], utils.bo[field][0][1],
                        intercept=True)
-                    at = Attacked_fields(utils.intercept_bo, utils.ob, utils.check)
+                    at = Attacked_fields(utils.intercept_bo, utils.ob)
                     utils.check = at.get_dict_of_fields()
                     # put interceptor back where he was so that his field does not change for loop
                     utils.update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
@@ -111,7 +111,10 @@ class Check_game_over():
         returns True if check mate
         :return:
         """
-        self.king = utils.find_king(self.color)
+        color = 'black'
+        if self.color == 'black':
+            color = 'white'
+        self.king = utils.find_king(color)
         check = False
         if self.king.color == 'black' and utils.check[self.king.field] in [-1,2]:
             check = True

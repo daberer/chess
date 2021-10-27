@@ -23,9 +23,6 @@ class Move():
 
 
 
-
-
-
     def noroadblocks(self):
         if self.piece.name() not in ['Pawn', 'Bishop', 'Rook', 'Queen']:
             return True

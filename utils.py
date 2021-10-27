@@ -1,4 +1,6 @@
-import chess_pieces
+from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
+from check import Attacked_fields
+import re
 
 def loc(str):
     """
@@ -26,7 +28,61 @@ for x in range(1,9):
 
 all_sprites_list = None
 
-check_given = False
+
+
+def recreate_checkdict():
+    at = Attacked_fields(bo, ob)
+    # find all attacked fields for attacker
+    global check
+    check = at.get_dict_of_fields()
+
+
+def go_home(piece):
+    """
+    Return piece to position it had prior to move
+    :param piece:
+    :return:
+    """
+    piece.rect.x = bo[piece.field][0][0]
+    piece.rect.y = bo[piece.field][0][1]
+    return False
+
+
+def legal(mv, piece, piecex, piecey, old_inhabitant):
+    """
+    checks if move is according to the allowed move patterns for each piece (isthisallowed)
+    checks if no pieces are on the way to the new field (noroadbloacks)
+    checks if a given check is being countered (escape_check)
+    :param mv: move class
+    :param piece: Chess piece that is moving (Class from chess-pieces)
+    :param piecex: x coordinate of new field
+    :param piecey: y coordinate of new field
+    :param old_inhabitant: piece or None, occupying the new field
+    :return:
+    """
+    # check if move is legal
+    if mv.isthisallowed():
+        if mv.noroadblocks():
+            if escape_check(piece, mv):
+                piece.rect.x = piecex
+                piece.rect.y = piecey
+
+                if old_inhabitant != None:# check if someone is there
+                    if piece.color != old_inhabitant.color:
+                        old_inhabitant.kill()
+                        return update(piece, piecex, piecey, False)
+                    else:
+                        return go_home(piece)
+                else:
+                    return update(piece, piecex, piecey, False)
+            else:
+                return go_home(piece)
+        else:
+            return go_home(piece)
+    else:
+        return go_home(piece)
+
+
 
 
 
@@ -41,7 +97,7 @@ def find_king(color):
     for k,j in vals:
         if j:
             if j.name() == 'King':
-                if j.color != color:
+                if j.color == color:
                     king = j
     return king
 
@@ -52,7 +108,7 @@ def set_up_piece(color, coordinate_tuple, kind, field):
     piece.rect.y = coordinate_tuple[1]
     return piece
 
-def update(piece, piecex, piecey, intercept=False, Queen=None):
+def update(piece, piecex, piecey, intercept=False):
     """
     Update dictionary with positions
     :param piece:
@@ -80,6 +136,12 @@ def update(piece, piecex, piecey, intercept=False, Queen=None):
         return True
 
 def escape_check(piece, move):
+    """
+    in this move the King needs to leave check
+    :param piece:
+    :param move:
+    :return:
+    """
     if not check_given:
         return True
 
@@ -89,7 +151,28 @@ def escape_check(piece, move):
     if piece == king:
         return True
 
-    update(piece, bo[piece.field][0][0], bo[piece.field][0][1], False, chess_pieces.Queen)
+    col, x, y, ty, fd = None, None, None, None, None
+    if move.old_inhabitant:
+        col, x, y, ty, fd = move.old_inhabitant.color, bo[move.old_inhabitant.field][0][0], \
+                             bo[move.old_inhabitant.field][0][1],  move.old_inhabitant.return_class(), \
+                             move.old_inhabitant.field
+    origin = piece.field
+    update(piece, move.new_field[0], move.new_field[1], False)
+    at = Attacked_fields(bo, ob)
+    global check
+    check = at.get_dict_of_fields()
+
+    if (king.color == 'black' and check[king.field] not in [-1, 1]) or (king.color == 'white' and check[king.field] not in [1, 2]):
+        return True
+
+    update(piece, bo[origin][0][0], bo[origin][0][1], False)
+    old_inhabitant = set_up_piece(col, (x,y), ty, fd)
+    all_sprites_list.add(old_inhabitant)
+    return False
+
+
+
+
     print('deal with piece that stepped in between')
     print('deal with piece that takes other piece')
     return False
@@ -101,3 +184,82 @@ def escape_check(piece, move):
     # if not ch.king_in_check(self.king):
     #     return True
     # return False
+
+#translate field into x,y
+def fen_code(sign):
+    """
+    translates Forsyth-Edward-Notation into the corresponding chess piece
+    :param sign: str of fen code
+    :return: color and type of piece
+    """
+    assert(type(sign) == str)
+    if sign.isupper():
+        col = 'white'
+    else:
+        col = 'black'
+    sign = sign.lower()
+    if sign == 'p':
+        ret = Pawn
+    elif sign == 'n':
+        ret = Knight
+    elif sign == 'b':
+        ret = Bishop
+    elif sign == 'r':
+        ret = Rook
+    elif sign == 'q':
+        ret = Queen
+    elif sign == 'k':
+        ret = King
+    elif sign == 'o':
+        ret = None
+    else:
+        raise Exception(f'{sign} is not a valid sign:')
+
+    return col, ret
+
+
+
+
+def fen_insert(st, length, ind):
+    """
+    inserts up to eight "o" characters into an input string instead of an integer 1-8 at a given index.
+    :param st: string, that is being added to
+    :param length: int, number of times "o" is being added to st
+    :param ind: int, index where int is located in st.
+    :return:
+    """
+    return st[:ind] + length*'o' + st[ind+1:]
+
+def has_numbers(inputString):
+    """
+    Checks input string for numbers.
+    :param inputString:
+    :return: True if inputString has number.
+    """
+    return bool(re.search(r'\d', inputString))
+
+def extend_fen(fen):
+    """
+    replace the number for number of empty fields in the fen notation with 'o' times the number
+    rn3k becomes rnoook
+    :param fen:
+    :return:
+    """
+    ext_fen = (fen + '.')[:-1]
+    while has_numbers(ext_fen):
+        ind = None
+        match = re.search(r"\d", ext_fen)
+        if match:
+            ind = match.start()
+            ext_fen = fen_insert(ext_fen, int(ext_fen[ind]), ind)
+    return ext_fen
+
+#TODO: fix fen set up (Queen and King are set conversly) or are they correct and the fen code was wrong?
+start_fen = 'rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR'
+#start_fen = "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR"
+check_given = False
+start_fen = start_fen.replace('/','')
+start_fen = extend_fen(start_fen)
+start_fen = start_fen[::-1]
+
+

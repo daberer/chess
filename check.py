@@ -1,24 +1,28 @@
 import numpy as np
 
 class Attacked_fields():
-    def __init__(self, bo, ob, di):
+    def __init__(self, bo, ob):
         self.attackers = [bo[b][1] for b in bo if bo[b][1] != None]
-        self.di = di
         self.bo = bo
         self.ob = ob
         self.piece = None
+
+    def create_dict(self):
+        self.di = {}
+        for x in range(1,9):
+            for y in ['A','B','C','D','E','F','G','H']:
+                self.di[f"{y}{x}"] = 0
 
     def clear_dict(self):
         self.di = dict.fromkeys(self.di, 0)
 
 
     def get_dict_of_fields(self, exclude=None):
-        self.clear_dict()
+        self.create_dict()
         self.black_attackfields = []
         self.white_attackfields = []
         for piece in self.attackers:
             if (piece.name(), piece.field) == exclude:
-                print('queen')
                 continue
             self.piece = piece
             if self.piece.color == 'black':

@@ -17,6 +17,9 @@ class Piece(pygame.sprite.Sprite):
     def name(self):
         return self.__class__.__name__
 
+    def return_class(self):
+        return type(self)
+
 class Pawn(Piece):
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor

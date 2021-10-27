@@ -1,8 +1,6 @@
 import pygame, random
-import re
-from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
 from move import Move
-from check import Attacked_fields
+
 from game_over import Check_game_over
 import utils
 
@@ -17,9 +15,7 @@ BLACK = (0,0,0)
 LIGHT = (242,218,182)
 DARK = (181,135,99)
 
-#TODO: fix fen set up (Queen and King are set conversly) or are they correct and the fen code was wrong?
-start_fen = 'rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR'
-#start_fen = "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR"
+
 
 SCREENWIDTH=800
 SCREENHEIGHT=800
@@ -33,83 +29,8 @@ font = pygame.font.SysFont(None, 100)
 utils.all_sprites_list = pygame.sprite.Group()
 
 
-
-#translate field into x,y
-def fen_code(sign):
-    """
-    translates Forsyth-Edward-Notation into the corresponding chess piece
-    :param sign: str of fen code
-    :return: color and type of piece
-    """
-    assert(type(sign) == str)
-    if sign.isupper():
-        col = 'white'
-    else:
-        col = 'black'
-    sign = sign.lower()
-    if sign == 'p':
-        ret = Pawn
-    elif sign == 'n':
-        ret = Knight
-    elif sign == 'b':
-        ret = Bishop
-    elif sign == 'r':
-        ret = Rook
-    elif sign == 'q':
-        ret = Queen
-    elif sign == 'k':
-        ret = King
-    elif sign == 'o':
-        ret = None
-    else:
-        raise Exception(f'{sign} is not a valid sign:')
-
-    return col, ret
-
-
-
-
-def fen_insert(st, length, ind):
-    """
-    inserts up to eight "o" characters into an input string instead of an integer 1-8 at a given index.
-    :param st: string, that is being added to
-    :param length: int, number of times "o" is being added to st
-    :param ind: int, index where int is located in st.
-    :return:
-    """
-    return st[:ind] + length*'o' + st[ind+1:]
-
-def has_numbers(inputString):
-    """
-    Checks input string for numbers.
-    :param inputString:
-    :return: True if inputString has number.
-    """
-    return bool(re.search(r'\d', inputString))
-
-def extend_fen(fen):
-    """
-    replace the number for number of empty fields in the fen notation with 'o' times the number
-    rn3k becomes rnoook
-    :param fen:
-    :return:
-    """
-    ext_fen = (fen + '.')[:-1]
-    while has_numbers(ext_fen):
-        ind = None
-        match = re.search(r"\d", ext_fen)
-        if match:
-            ind = match.start()
-            ext_fen = fen_insert(ext_fen, int(ext_fen[ind]), ind)
-    return ext_fen
-
-start_fen = start_fen.replace('/','')
-start_fen = extend_fen(start_fen)
-start_fen = start_fen[::-1]
-
-
 for i, field in enumerate(utils.bo):
-    co, ty = fen_code(start_fen[i])
+    co, ty = utils.fen_code(utils.start_fen[i])
     if ty is not None:
         piece = utils.set_up_piece(co, utils.bo[field][0], ty, field)
         utils.bo[field][1] = piece
@@ -117,11 +38,19 @@ for i, field in enumerate(utils.bo):
 
 
 
+
+
+
+
+
+
+
+
 #Allowing the user to close the window...
 carryOn = True
 clock=pygame.time.Clock()
 score = 0
-pl = Player()
+pl = utils.Player()
 utils.all_sprites_list.add(pl)
 
 
@@ -134,51 +63,11 @@ fields = [(i * 100, j * 100) for j in range(8) for i in range(8)]
 
 game_over = False
 
-def go_home(piece):
-    """
-    Return piece to position it had prior to move
-    :param piece:
-    :return:
-    """
-    piece.rect.x = utils.bo[piece.field][0][0]
-    piece.rect.y = utils.bo[piece.field][0][1]
-    return False
 
 
 
-def legal(mv, piece, piecex, piecey, old_inhabitant):
-    """
-    checks if move is according to the allowed move patterns for each piece (isthisallowed)
-    checks if no pieces are on the way to the new field (noroadbloacks)
-    checks if a given check is being countered (escape_check)
-    :param mv: move class
-    :param piece: Chess piece that is moving (Class from chess-pieces)
-    :param piecex: x coordinate of new field
-    :param piecey: y coordinate of new field
-    :param old_inhabitant: piece or None, occupying the new field
-    :return:
-    """
-    # check if move is legal
-    if mv.isthisallowed():
-        if mv.noroadblocks():
-            if utils.escape_check(piece, mv):
-                piece.rect.x = piecex
-                piece.rect.y = piecey
 
-                if old_inhabitant != None:# check if someone is there
-                    if piece.color != old_inhabitant.color:
-                        old_inhabitant.kill()
-                        return utils.update(piece, piecex, piecey, False, Queen)
-                    else:
-                        return go_home(piece)
-                else:
-                    return utils.update(piece, piecex, piecey, False, Queen)
-            else:
-                return go_home(piece)
-        else:
-            return go_home(piece)
-    else:
-        return go_home(piece)
+
 
 def get_weights(p_name, col):
     if p_name == 'Pawn' and col == 'white':
@@ -230,7 +119,7 @@ def find_best_move(possible_pieces, enemy_pieces):
 
 
 def execute_move(move_count, computer_move=False):
-    recreate_checkdict()
+    utils.recreate_checkdict()
     col = 'black'
     if move_count % 2 == 0:
         col = 'white'
@@ -240,7 +129,7 @@ def execute_move(move_count, computer_move=False):
         VIP_target = find_best_move(possible_pieces, enemy_pieces)
 
         if VIP_target:
-            legal(VIP_target[3], VIP_target[1], utils.bo[VIP_target[2].field][0][0], utils.bo[VIP_target[2].field][0][1], VIP_target[2])
+            utils.legal(VIP_target[3], VIP_target[1], utils.bo[VIP_target[2].field][0][0], utils.bo[VIP_target[2].field][0][1], VIP_target[2])
             return True
 
 
@@ -262,7 +151,7 @@ def execute_move(move_count, computer_move=False):
             possible_fields.remove(goal)
             old_inhabitant = utils.bo[goal][1]
             mv = Move(utils.bo[piece.field][0], utils.bo[goal][0], piece, old_inhabitant, utils.bo, utils.ob)
-            if legal(mv, piece, utils.bo[goal][0][0], utils.bo[goal][0][1], old_inhabitant):
+            if utils.legal(mv, piece, utils.bo[goal][0][0], utils.bo[goal][0][1], old_inhabitant):
                 return True
 
 
@@ -271,16 +160,16 @@ def execute_move(move_count, computer_move=False):
         pl.carry_pieces_list = []
 
         if move_count % 2 == 0 and piece.color == 'black':
-            go_home(piece)
+            utils.go_home(piece)
         elif move_count % 2 != 0 and piece.color == 'white':
-            go_home(piece)
+            utils.go_home(piece)
         piecex = round(piece.rect.x, -2)
         piecey = round(piece.rect.y, -2)
 
         old_inhabitant = utils.bo[utils.ob[piecex, piecey]][1]
         mv = Move(utils.bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, utils.bo, utils.ob, utils.check)
-        ret = legal(mv, piece, piecex, piecey, old_inhabitant)
-        recreate_checkdict()
+        ret = utils.legal(mv, piece, piecex, piecey, old_inhabitant)
+        utils.recreate_checkdict()
         go = Check_game_over(piece.color)
         return ret, go.checkmate()
 
@@ -288,21 +177,10 @@ def execute_move(move_count, computer_move=False):
 
 
 
-def recreate_checkdict():
-    at = Attacked_fields(utils.bo, utils.ob, utils.check)
-    # find all attacked fields for attacker
-    utils.check = at.get_dict_of_fields()
 
 
 
-def check_game_over():
-    two = 0
-    for s in  utils.all_sprites_list.sprites():
-        if type(s) == King:
-            two += 1
-    if two == 2:
-        return False
-    return True
+
 
 
 def end_game(move_count):
@@ -326,7 +204,7 @@ def draw_board():
 
 game_over = False
 move_count = 0
-recreate_checkdict()
+utils.recreate_checkdict()
 auto = False
 while carryOn:
         for event in pygame.event.get():
