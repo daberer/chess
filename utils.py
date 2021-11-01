@@ -63,9 +63,12 @@ def legal(mv, piece, piecex, piecey, old_inhabitant):
     # check if move is legal
     if mv.isthisallowed():
         if mv.noroadblocks():
-            if escape_check(piece, mv):
+            boo, oi =  escape_check(piece, mv)
+            if boo:
                 piece.rect.x = piecex
                 piece.rect.y = piecey
+                if oi:
+                    old_inhabitant = oi
 
                 if old_inhabitant != None:# check if someone is there
                     if piece.color != old_inhabitant.color:
@@ -143,32 +146,40 @@ def escape_check(piece, move):
     :return:
     """
     if not check_given:
-        return True
+        return True, None
 
     king = find_king(piece.color)
 
     # maybe king moved. should suffice because king cannot move to a field that is threatened.
     if piece == king:
-        return True
+        return True, None
 
     col, x, y, ty, fd = None, None, None, None, None
+    origin = piece.field
     if move.old_inhabitant:
         col, x, y, ty, fd = move.old_inhabitant.color, bo[move.old_inhabitant.field][0][0], \
                              bo[move.old_inhabitant.field][0][1],  move.old_inhabitant.return_class(), \
                              move.old_inhabitant.field
-    origin = piece.field
+        move.old_inhabitant.kill()
+
     update(piece, move.new_field[0], move.new_field[1], False)
     at = Attacked_fields(bo, ob)
     global check
     check = at.get_dict_of_fields()
 
     if (king.color == 'black' and check[king.field] not in [-1, 1]) or (king.color == 'white' and check[king.field] not in [1, 2]):
-        return True
+        update(piece, bo[origin][0][0], bo[origin][0][1], False)
+        if move.old_inhabitant:
+            old_inhabitant = set_up_piece(col, (x,y), ty, fd)
+            all_sprites_list.add(old_inhabitant)
+            return True, old_inhabitant
+        return True, None
 
     update(piece, bo[origin][0][0], bo[origin][0][1], False)
-    old_inhabitant = set_up_piece(col, (x,y), ty, fd)
-    all_sprites_list.add(old_inhabitant)
-    return False
+    if move.old_inhabitant:
+        old_inhabitant = set_up_piece(col, (x,y), ty, fd)
+        all_sprites_list.add(old_inhabitant)
+    return False, None
 
 
 

@@ -227,11 +227,11 @@ while carryOn:
                 game_over, check_given = check_status
                 if correct_move:
                     move_count += 1
-                if check_given:
-                    print('Check')
-                    utils.check_given = True
-                else:
-                    utils.check_given = False
+                    if check_given:
+                        print('Check')
+                        utils.check_given = True
+                    else:
+                        utils.check_given = False
 
 
 
