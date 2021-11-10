@@ -3,14 +3,14 @@ import utils
 
 
 class Move():
-    def __init__(self, old_field, new_field, piece, old_inhabitant, bo, ob, check_dict=None):
+    def __init__(self, old_field, new_field, piece, old_occupant, bo, ob, check_dict=None):
         self.old_field = old_field
         self.new_field = new_field
         self.piece = piece
         self.move = None
         self.diff = tuple(map(lambda i,j: i - j, self.old_field, self.new_field))
         self.dist = round(math.hypot(self.diff[0], self.diff[1]), 2)
-        self.old_inhabitant = old_inhabitant
+        self.old_occupant = old_occupant
         self.bo = bo
         self.ob = ob
         self.check_dict = check_dict
@@ -53,7 +53,7 @@ class Move():
             return self.king()
 
     def pawn(self):
-        if not self.old_inhabitant:
+        if not self.old_occupant:
             # move one or two fields with pawn
             self.move = [(0, 100)]
             if self.old_field[1] == 100 and self.piece.color == 'black' or self.old_field[1] == 600 and self.piece.color == 'white':
@@ -66,9 +66,9 @@ class Move():
 
         # move pawn diagonally
         if self.dist == 141.42:
-            if self.piece.color == 'white' and self.diff[1] > 0 and self.old_inhabitant:
+            if self.piece.color == 'white' and self.diff[1] > 0 and self.old_occupant:
                 return True
-            if self.piece.color == 'black' and self.diff[1] < 0 and self.old_inhabitant:
+            if self.piece.color == 'black' and self.diff[1] < 0 and self.old_occupant:
                 return True
         return False
 

@@ -1,3 +1,4 @@
+import chess_pieces
 from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
 from check import Attacked_fields
 import re
@@ -48,7 +49,7 @@ def go_home(piece):
     return False
 
 
-def legal(mv, piece, piecex, piecey, old_inhabitant):
+def legal(mv, piece, piecex, piecey, old_occupant):
     """
     checks if move is according to the allowed move patterns for each piece (isthisallowed)
     checks if no pieces are on the way to the new field (noroadbloacks)
@@ -57,39 +58,37 @@ def legal(mv, piece, piecex, piecey, old_inhabitant):
     :param piece: Chess piece that is moving (Class from chess-pieces)
     :param piecex: x coordinate of new field
     :param piecey: y coordinate of new field
-    :param old_inhabitant: piece or None, occupying the new field
+    :param old_occupant: piece or None, occupying the new field
     :return:
     """
     # check if move is legal
     if mv.isthisallowed():
         if mv.noroadblocks():
-            boo, oi =  escape_check(piece, mv)
-            if boo:
-                piece.rect.x = piecex
-                piece.rect.y = piecey
-                if oi:
-                    old_inhabitant = oi
+            not_causes_check_bool, causes_check_old_occupant = not_causes_check(piece, mv)
+            if not_causes_check_bool:
+                old_occupant = causes_check_old_occupant
+                mv.old_occupant = old_occupant
+                escape_bool, escape_old_occupant = escape_check(piece, mv)
 
-                if old_inhabitant != None:# check if someone is there
-                    if piece.color != old_inhabitant.color:
-                        old_inhabitant.kill()
-                        return update(piece, piecex, piecey, False)
+                if escape_bool:
+                    piece.rect.x = piecex
+                    piece.rect.y = piecey
+                    if escape_old_occupant:
+                        old_occupant = escape_old_occupant
+    
+                    if old_occupant != None:# check if someone is there
+                        if piece.color != old_occupant.color:
+                            old_occupant.kill()
+                            return update(piece, piecex, piecey, False)
+                        else:
+                            return go_home(piece)
                     else:
-                        return go_home(piece)
-                else:
-                    return update(piece, piecex, piecey, False)
-            else:
-                return go_home(piece)
-        else:
-            return go_home(piece)
-    else:
+                        return update(piece, piecex, piecey, False)
+    
         return go_home(piece)
 
 
-
-
-
-def find_king(color):
+def find_king(color: str) -> chess_pieces.King:
     """
     finds the kind in all
     :param ret: bool, true if the king piece shall be returned to calling function (makes code reusable)
@@ -138,29 +137,33 @@ def update(piece, piecex, piecey, intercept=False):
         piece.field = ob[piecex, piecey]
         return True
 
-def escape_check(piece, move):
+
+
+def hypothetical_move_check(piece, move):
     """
-    in this move the King needs to leave check
+    Check if at the end of move there is still danger to the king.
+    The return of the former occupant piece is necessary because the hypothetical function potentially kills off a piece
+    in the new field.
     :param piece:
     :param move:
     :return:
+    bool : True if after move there is no danger to king.
+    old_occupant : chess_piece.object or None
     """
-    if not check_given:
-        return True, None
 
     king = find_king(piece.color)
 
     # maybe king moved. should suffice because king cannot move to a field that is threatened.
     if piece == king:
-        return True, None
+        return True, move.old_occupant
 
     col, x, y, ty, fd = None, None, None, None, None
     origin = piece.field
-    if move.old_inhabitant:
-        col, x, y, ty, fd = move.old_inhabitant.color, bo[move.old_inhabitant.field][0][0], \
-                             bo[move.old_inhabitant.field][0][1],  move.old_inhabitant.return_class(), \
-                             move.old_inhabitant.field
-        move.old_inhabitant.kill()
+    if move.old_occupant:
+        col, x, y, ty, fd = move.old_occupant.color, bo[move.old_occupant.field][0][0], \
+                             bo[move.old_occupant.field][0][1],  move.old_occupant.return_class(), \
+                             move.old_occupant.field
+        move.old_occupant.kill()
 
     update(piece, move.new_field[0], move.new_field[1], False)
     at = Attacked_fields(bo, ob)
@@ -169,27 +172,57 @@ def escape_check(piece, move):
 
     if (king.color == 'black' and check[king.field] not in [-1, 1]) or (king.color == 'white' and check[king.field] not in [1, 2]):
         update(piece, bo[origin][0][0], bo[origin][0][1], False)
-        if move.old_inhabitant:
-            old_inhabitant = set_up_piece(col, (x,y), ty, fd)
-            all_sprites_list.add(old_inhabitant)
-            return True, old_inhabitant
+        if move.old_occupant:
+            old_occupant = set_up_piece(col, (x,y), ty, fd)
+            all_sprites_list.add(old_occupant)
+            return True, old_occupant
         return True, None
 
     update(piece, bo[origin][0][0], bo[origin][0][1], False)
-    if move.old_inhabitant:
-        old_inhabitant = set_up_piece(col, (x,y), ty, fd)
-        all_sprites_list.add(old_inhabitant)
+    if move.old_occupant:
+        old_occupant = set_up_piece(col, (x,y), ty, fd)
+        all_sprites_list.add(old_occupant)
     return False, None
 
 
+
+
+def not_causes_check(piece, move):
+    """
+    If the move would cause the king to be in check
+    :param piece:
+    :param move:
+    :return:
+    """
+    allowed, occupant = hypothetical_move_check(piece, move) 
+    return allowed, occupant
+
+
+
+
+
+def escape_check(piece, move):
+    """
+    in this move the King needs to leave check
+    :param piece:
+    :param move:
+    :return:
+    bool : True if king leaves check with the move
+    old_occupant : chess_piece.object or None
+    """
+
+    if not check_given:
+        return True, None
+
+    return hypothetical_move_check(piece, move)
 
 
     print('deal with piece that stepped in between')
     print('deal with piece that takes other piece')
     return False
     # at = Attacked_fields(utils.bo, utils.ob, utils.check)
-    # if self.old_inhabitant:
-    #     utils.check = at.get_dict_of_fields(exclude=(self.old_inhabitant.name(), self.old_inhabitant.field))
+    # if self.old_occupant:
+    #     utils.check = at.get_dict_of_fields(exclude=(self.old_occupant.name(), self.old_occupant.field))
     # else:
     #     utils.check = at.get_dict_of_fields()
     # if not ch.king_in_check(self.king):

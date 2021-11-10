@@ -37,15 +37,6 @@ for i, field in enumerate(utils.bo):
         utils.all_sprites_list.add(piece)
 
 
-
-
-
-
-
-
-
-
-
 #Allowing the user to close the window...
 carryOn = True
 clock=pygame.time.Clock()
@@ -62,9 +53,6 @@ screen.fill(GREEN)
 fields = [(i * 100, j * 100) for j in range(8) for i in range(8)]
 
 game_over = False
-
-
-
 
 
 
@@ -149,9 +137,9 @@ def execute_move(move_count, computer_move=False):
         while len(possible_fields):
             goal = random.choice(possible_fields)
             possible_fields.remove(goal)
-            old_inhabitant = utils.bo[goal][1]
-            mv = Move(utils.bo[piece.field][0], utils.bo[goal][0], piece, old_inhabitant, utils.bo, utils.ob)
-            if utils.legal(mv, piece, utils.bo[goal][0][0], utils.bo[goal][0][1], old_inhabitant):
+            old_occupant = utils.bo[goal][1]
+            mv = Move(utils.bo[piece.field][0], utils.bo[goal][0], piece, old_occupant, utils.bo, utils.ob)
+            if utils.legal(mv, piece, utils.bo[goal][0][0], utils.bo[goal][0][1], old_occupant):
                 return True
 
 
@@ -166,19 +154,12 @@ def execute_move(move_count, computer_move=False):
         piecex = round(piece.rect.x, -2)
         piecey = round(piece.rect.y, -2)
 
-        old_inhabitant = utils.bo[utils.ob[piecex, piecey]][1]
-        mv = Move(utils.bo[piece.field][0], (piecex, piecey), piece, old_inhabitant, utils.bo, utils.ob, utils.check)
-        ret = utils.legal(mv, piece, piecex, piecey, old_inhabitant)
+        old_occupant = utils.bo[utils.ob[piecex, piecey]][1]
+        mv = Move(utils.bo[piece.field][0], (piecex, piecey), piece, old_occupant, utils.bo, utils.ob, utils.check)
+        ret = utils.legal(mv, piece, piecex, piecey, old_occupant)
         utils.recreate_checkdict()
         go = Check_game_over(piece.color)
         return ret, go.checkmate()
-
-
-
-
-
-
-
 
 
 
