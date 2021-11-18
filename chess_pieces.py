@@ -68,8 +68,7 @@ class Bishop(Piece):
         self.rect = self.image.get_rect()
 
 class Rook(Piece):
-
-    def __init__(self, color, field):
+    def __init__(self, color, field, castle=True):
         # Call the parent class (Sprite) constructor
         super().__init__(color, field)
         if self.color == 'black':
@@ -80,6 +79,7 @@ class Rook(Piece):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
+        self.castle = castle
 
 
 class Queen(Piece):
@@ -99,7 +99,7 @@ class Queen(Piece):
 
 
 class King(Piece):
-    def __init__(self, color, field):
+    def __init__(self, color, field, castle=True):
         # Call the parent class (Sprite) constructor
         super().__init__(color, field)
 
@@ -111,6 +111,7 @@ class King(Piece):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
+        self.castle = castle
 
 class Player(pygame.sprite.Sprite):
     """

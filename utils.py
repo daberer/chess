@@ -1,4 +1,3 @@
-import chess_pieces
 from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King, Player
 from check import Attacked_fields
 import re
@@ -88,7 +87,7 @@ def legal(mv, piece, piecex, piecey, old_occupant):
         return go_home(piece)
 
 
-def find_king(color: str) -> chess_pieces.King:
+def find_king(color: str) -> King:
     """
     finds the kind in all
     :param ret: bool, true if the king piece shall be returned to calling function (makes code reusable)

@@ -8,7 +8,7 @@ class Move():
         self.new_field = new_field
         self.piece = piece
         self.move = None
-        self.diff = tuple(map(lambda i,j: i - j, self.old_field, self.new_field))
+        self.diff = tuple(map(lambda i,j: i - j, self.new_field, self.old_field))
         self.dist = round(math.hypot(self.diff[0], self.diff[1]), 2)
         self.old_occupant = old_occupant
         self.bo = bo
@@ -66,9 +66,9 @@ class Move():
 
         # move pawn diagonally
         if self.dist == 141.42:
-            if self.piece.color == 'white' and self.diff[1] > 0 and self.old_occupant:
+            if self.piece.color == 'white' and self.diff[1] < 0 and self.old_occupant:
                 return True
-            if self.piece.color == 'black' and self.diff[1] < 0 and self.old_occupant:
+            if self.piece.color == 'black' and self.diff[1] > 0 and self.old_occupant:
                 return True
         return False
 
@@ -86,6 +86,8 @@ class Move():
 
     def rook(self):
         if self.diff[0] == 0 or self.diff[1] == 0:
+            # if rook moves then castling is not allowed anymore
+            self.piece.castle = False
             return True
         return False
 
@@ -101,15 +103,57 @@ class Move():
         """
         if self.dist == 141.42 or self.dist == 100:
             if self.piece.color == 'black' and not self.check_dict[self.ob[self.new_field]] in [-1, 1]:
+                self.piece.castle = False # no more castling
                 return True
             if self.piece.color == 'white' and not self.check_dict[self.ob[self.new_field]] in [1, 2]:
+                self.piece.castle = False
                 return True
+
+        #castling
+        elif self.ob[self.old_field][1] == self.ob[self.new_field][1]: #horizontal movement
+
+            #kingside castle
+            if self.dist == 200 and (ord(self.ob[self.old_field][0]) < ord(self.ob[self.new_field][0])) and not self.old_occupant:
+                if self.rook_ready_to_castle():
+                    return True
+
+            #queenside castle
+            elif self.dist == 300 and (ord(self.ob[self.old_field][0]) > ord(self.ob[self.new_field][0])) and not self.old_occupant:
+                if self.rook_ready_to_castle(queenside=True):
+                    return True
         return False
+
+    def rook_ready_to_castle(self, queenside=False):
+        """
+        checks if there is a rook available to castle.
+        :param queenside:
+        :return:
+        """
+        if not queenside:
+            rook_homefield = self.ob[self.add_two_tuples(self.new_field, (100, 0))]
+            rook_newfield = self.add_two_tuples(self.new_field, (-100, 0))
+        else:
+            rook_homefield = self.add_two_tuples(self.new_field, self.diff)
+            rook_newfield = self.add_two_tuples(self.new_field, (100, 0))
+
+        if self.bo[rook_homefield] != None:
+            if self.bo[rook_homefield][1].name() == 'Rook':
+                if self.bo[rook_homefield][1].castle == True:
+                    self.bo[rook_homefield][1].kill()
+                    import chess_pieces
+                    new_rook = utils.set_up_piece(color=self.piece.color, coordinate_tuple=rook_newfield, kind=chess_pieces.Rook,
+                                       field=self.ob[rook_newfield])
+                    utils.all_sprites_list.add(new_rook)
+                    return True
+        return False
+
 
     ########### helper functions
 
     def add_two_tuples(self, one, two):
         return tuple(map(lambda i, j: i + j, one, two))
+
+
 
     def get_fields_on_the_way(self, start, end):
         """
