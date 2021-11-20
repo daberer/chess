@@ -1,8 +1,7 @@
 import pygame
 import utils
+
 WHITE = (255, 255, 255)
-
-
 
 
 class Piece(pygame.sprite.Sprite):
@@ -20,11 +19,11 @@ class Piece(pygame.sprite.Sprite):
     def return_class(self):
         return type(self)
 
+
 class Pawn(Piece):
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__(color, field)
-
 
         if self.color == 'black':
             self.image = pygame.image.load("pieces/black_pawn.png").convert_alpha()
@@ -34,7 +33,6 @@ class Pawn(Piece):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
-
 
 
 class Knight(Piece):
@@ -53,7 +51,6 @@ class Knight(Piece):
 
 
 class Bishop(Piece):
-
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__(color, field)
@@ -66,6 +63,7 @@ class Bishop(Piece):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
+
 
 class Rook(Piece):
     def __init__(self, color, field, castle=True):
@@ -83,7 +81,6 @@ class Rook(Piece):
 
 
 class Queen(Piece):
-
     def __init__(self, color, field):
         # Call the parent class (Sprite) constructor
         super().__init__(color, field)
@@ -113,13 +110,15 @@ class King(Piece):
         self.rect = self.image.get_rect()
         self.castle = castle
 
+
 class Player(pygame.sprite.Sprite):
     """
     This class represents the player
     """
+
     def __init__(self):
-        """ Constructor. Pass in the color of the block,
-        and its x and y position. """
+        """Constructor. Pass in the color of the block,
+        and its x and y position."""
 
         # Call the parent class (Sprite) constructor
         super().__init__()
@@ -139,12 +138,3 @@ class Player(pygame.sprite.Sprite):
 
         for piece in self.carry_pieces_list:
             piece.rect.center = (pos[0], pos[1])
-
-
-
-
-
-
-
-
-

@@ -4,12 +4,9 @@ import utils
 import copy
 
 
-class Check_game_over():
+class Check_game_over:
     def __init__(self, col):
         self.color = col
-
-
-
 
     def run_away(self):
         """
@@ -17,12 +14,20 @@ class Check_game_over():
         :return:
         """
         ch, nu = ord(self.king.field[0]), int(self.king.field[-1])
-        hor = [chr(j)+str(nu) for j in [i + ch for i in range(-1,2,2)] if j > 64 and j < 73]
-        ver = [chr(ch) + str(j) for j in [i + nu for i in range(-1,2,2)] if j < 9 and j > 0]
+        hor = [
+            chr(j) + str(nu)
+            for j in [i + ch for i in range(-1, 2, 2)]
+            if j > 64 and j < 73
+        ]
+        ver = [
+            chr(ch) + str(j)
+            for j in [i + nu for i in range(-1, 2, 2)]
+            if j < 9 and j > 0
+        ]
         diag = []
         for num in ver:
             for let in hor:
-             diag.append(let[0] + (num[1]))
+                diag.append(let[0] + (num[1]))
         fields = hor + ver + diag
 
         for field in fields:
@@ -55,6 +60,7 @@ class Check_game_over():
         :return:
         """
         col = self.king.color
+
         def go_back_to_bo():
             """
             renew hypothetical dict
@@ -63,24 +69,46 @@ class Check_game_over():
             utils.intercept_bo = {key: value for key, value in utils.bo.items()}
 
         # TODO prevent that they are the same thing!!!!!!
-        interceptors = [utils.bo[b][1] for b in utils.bo if utils.bo[b][1] != None and utils.bo[b][1].color == col]
-        enemies = [utils.bo[b][1] for b in utils.bo if utils.bo[b][1] != None and utils.bo[b][1].color != col]
+        interceptors = [
+            utils.bo[b][1]
+            for b in utils.bo
+            if utils.bo[b][1] != None and utils.bo[b][1].color == col
+        ]
+        enemies = [
+            utils.bo[b][1]
+            for b in utils.bo
+            if utils.bo[b][1] != None and utils.bo[b][1].color != col
+        ]
         empty_fields = [b for b in utils.bo.keys() if utils.bo[b][1] == None]
         for interceptor in interceptors:
             origin = interceptor.field
-            #check if someone on my team an kill someone of theirs to save the king
+            # check if someone on my team an kill someone of theirs to save the king
             for enemy in enemies:
                 go_back_to_bo()
-                mv = Move(utils.bo[interceptor.field][0], utils.bo[enemy.field][0], interceptor, enemy, utils.bo, utils.ob,
-                          utils.check)
+                mv = Move(
+                    utils.bo[interceptor.field][0],
+                    utils.bo[enemy.field][0],
+                    interceptor,
+                    enemy,
+                    utils.bo,
+                    utils.ob,
+                    utils.check,
+                )
                 # look if we can take down piece
                 if mv.isthisallowed() and mv.noroadblocks():
-                    utils.update(interceptor, utils.bo[interceptor.field][0][0], utils.bo[interceptor.field][0][1],intercept=True)
+                    utils.update(
+                        interceptor,
+                        utils.bo[interceptor.field][0][0],
+                        utils.bo[interceptor.field][0][1],
+                        intercept=True,
+                    )
                     at = Attacked_fields(utils.intercept_bo, utils.ob)
                     # find all attacked fields but exclude the "taken" enemy
                     utils.check = at.get_dict_of_fields((enemy.name(), enemy.field))
-                    #piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
-                    utils.update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
+                    # piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
+                    utils.update(
+                        interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1]
+                    )
                     go_back_to_bo()
                     if not self.king_in_check():
                         return True
@@ -90,19 +118,31 @@ class Check_game_over():
             # Hail mary
             for field in empty_fields:
                 go_back_to_bo()
-                mv = Move(utils.bo[interceptor.field][0], utils.bo[field][0], interceptor, None, utils.bo, utils.ob,
-                          utils.check)
+                mv = Move(
+                    utils.bo[interceptor.field][0],
+                    utils.bo[field][0],
+                    interceptor,
+                    None,
+                    utils.bo,
+                    utils.ob,
+                    utils.check,
+                )
                 if mv.isthisallowed() and mv.noroadblocks():
-                    utils.update(interceptor, utils.bo[field][0][0], utils.bo[field][0][1],
-                       intercept=True)
+                    utils.update(
+                        interceptor,
+                        utils.bo[field][0][0],
+                        utils.bo[field][0][1],
+                        intercept=True,
+                    )
                     at = Attacked_fields(utils.intercept_bo, utils.ob)
                     utils.check = at.get_dict_of_fields()
                     # put interceptor back where he was so that his field does not change for loop
-                    utils.update(interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1])
+                    utils.update(
+                        interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1]
+                    )
                     if not self.king_in_check():
                         return True
         return False
-
 
     def checkmate(self):
         """
@@ -116,10 +156,10 @@ class Check_game_over():
             color = 'white'
         self.king = utils.find_king(color)
         check = False
-        if self.king.color == 'black' and utils.check[self.king.field] in [-1,2]:
+        if self.king.color == 'black' and utils.check[self.king.field] in [-1, 2]:
             check = True
 
-        if self.king.color == 'white' and utils.check[self.king.field] in [1,2]:
+        if self.king.color == 'white' and utils.check[self.king.field] in [1, 2]:
             check = True
 
         if check:
@@ -129,7 +169,3 @@ class Check_game_over():
             return False, True
         else:
             return False, False
-
-
-
-
