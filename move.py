@@ -118,7 +118,7 @@ class Move():
                     return True
 
             #queenside castle
-            elif self.dist == 300 and (ord(self.ob[self.old_field][0]) > ord(self.ob[self.new_field][0])) and not self.old_occupant:
+            elif self.dist == 200 and (ord(self.ob[self.old_field][0]) > ord(self.ob[self.new_field][0])) and not self.old_occupant:
                 if self.rook_ready_to_castle(queenside=True):
                     return True
         return False
@@ -133,7 +133,7 @@ class Move():
             rook_homefield = self.ob[self.add_two_tuples(self.new_field, (100, 0))]
             rook_newfield = self.add_two_tuples(self.new_field, (-100, 0))
         else:
-            rook_homefield = self.add_two_tuples(self.new_field, self.diff)
+            rook_homefield = self.ob[self.add_two_tuples(self.new_field, self.diff)]
             rook_newfield = self.add_two_tuples(self.new_field, (100, 0))
 
         if self.bo[rook_homefield] != None:
