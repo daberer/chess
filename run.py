@@ -21,7 +21,7 @@ SCREENHEIGHT = 800
 
 size = (SCREENWIDTH, SCREENHEIGHT)
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption("Chess")
+pygame.display.set_caption("Chess - whites turn")
 font = pygame.font.SysFont(None, 100)
 
 # This will be a list that will contain all the sprites we intend to use in our game.
@@ -248,11 +248,22 @@ while carryOn:
             game_over, check_given = check_status
             if correct_move:
                 move_count += 1
+                if move_count % 2 == 0:
+                    cap = "Chess - whites turn "
+                else:
+                    cap = "Chess - blacks turn "
                 if check_given:
-                    print('Check')
+                    cap += '- check'
                     utils.check_given = True
                 else:
                     utils.check_given = False
+                pygame.display.set_caption(cap)
+            else:
+                if len(blocks_hit_list): # if touched piece is going to some illegal field, hop back wher it came from
+                    utils.go_home(blocks_hit_list[0])
+
+
+
 
         # if move_count % 2!= 0:
         #     import time
