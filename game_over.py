@@ -1,16 +1,16 @@
 from move import Move
 from check import Attacked_fields
-import utils
-import copy
+
 
 
 class Check_game_over:
-    def __init__(self, col):
+    def __init__(self, col, game):
         self.color = col
+        self.game = game
 
     def run_away(self):
         """
-        checks if the king can flee.
+        Returns True if the king can flee.
         :return:
         """
         ch, nu = ord(self.king.field[0]), int(self.king.field[-1])
@@ -31,26 +31,26 @@ class Check_game_over:
         fields = hor + ver + diag
 
         for field in fields:
-            if self.king.color == 'black' and utils.bo[field][1] == None:
-                if utils.check[field] not in [-1, 1]:
+            if self.king.color == 'black' and self.game.board[field][1] == None:
+                if self.game.board_check[field] not in [-1, 1]:
                     return True
 
-            if self.king.color == 'white' and utils.bo[field][1] == None:
-                if utils.check[field] not in [1, 2]:
+            if self.king.color == 'white' and self.game.board[field][1] == None:
+                if self.game.board_check[field] not in [1, 2]:
                     return True
         return False
 
     def king_in_check(self, king=None):
         """
-        see if king is in check according to the utils.check dictionary.
+        see if king is in check according to the game.board_check dictionary.
         :param king: Object of chess_pieces.King class, makes code reuseable.
         :return:
         """
         if king:
             self.king = king
-        if self.king.color == 'black' and utils.check[self.king.field] not in [-1, 1]:
+        if self.king.color == 'black' and self.game.board_check[self.king.field] not in [-1, 1]:
             return False
-        if self.king.color == 'white' and utils.check[self.king.field] not in [1, 2]:
+        if self.king.color == 'white' and self.game.board_check[self.king.field] not in [1, 2]:
             return False
         return True
 
@@ -66,48 +66,48 @@ class Check_game_over:
             renew hypothetical dict
             :return:
             """
-            utils.intercept_bo = {key: value for key, value in utils.bo.items()}
+            self.game.board_intercept = {key: value for key, value in self.game.board.items()}
 
         # TODO prevent that they are the same thing!!!!!!
         interceptors = [
-            utils.bo[b][1]
-            for b in utils.bo
-            if utils.bo[b][1] != None and utils.bo[b][1].color == col
+            self.game.board[b][1]
+            for b in self.game.board
+            if self.game.board[b][1] != None and self.game.board[b][1].color == col
         ]
         enemies = [
-            utils.bo[b][1]
-            for b in utils.bo
-            if utils.bo[b][1] != None and utils.bo[b][1].color != col
+            self.game.board[b][1]
+            for b in self.game.board
+            if self.game.board[b][1] != None and self.game.board[b][1].color != col
         ]
-        empty_fields = [b for b in utils.bo.keys() if utils.bo[b][1] == None]
+        empty_fields = [b for b in self.game.board.keys() if self.game.board[b][1] == None]
         for interceptor in interceptors:
             origin = interceptor.field
             # check if someone on my team an kill someone of theirs to save the king
             for enemy in enemies:
                 go_back_to_bo()
                 mv = Move(
-                    utils.bo[interceptor.field][0],
-                    utils.bo[enemy.field][0],
+                    self.game.board[interceptor.field][0],
+                    self.game.board[enemy.field][0],
                     interceptor,
                     enemy,
-                    utils.bo,
-                    utils.ob,
-                    utils.check,
+                    self.game.board,
+                    self.game.board_code,
+                    self.game.board_check,
                 )
                 # look if we can take down piece
                 if mv.isthisallowed() and mv.noroadblocks():
-                    utils.update(
+                    self.game.update(
                         interceptor,
-                        utils.bo[interceptor.field][0][0],
-                        utils.bo[interceptor.field][0][1],
+                        self.game.board[interceptor.field][0][0],
+                        self.game.board[interceptor.field][0][1],
                         intercept=True,
                     )
-                    at = Attacked_fields(utils.intercept_bo, utils.ob)
+                    at = Attacked_fields(self.game.board_intercept, self.game.board_code)
                     # find all attacked fields but exclude the "taken" enemy
-                    utils.check = at.get_dict_of_fields((enemy.name(), enemy.field))
+                    self.game.board_check = at.get_dict_of_fields((enemy.name(), enemy.field))
                     # piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
-                    utils.update(
-                        interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1]
+                    self.game.update(
+                        interceptor, self.game.board[origin][0][0], self.game.board[origin][0][1]
                     )
                     go_back_to_bo()
                     if not self.king_in_check():
@@ -119,26 +119,26 @@ class Check_game_over:
             for field in empty_fields:
                 go_back_to_bo()
                 mv = Move(
-                    utils.bo[interceptor.field][0],
-                    utils.bo[field][0],
+                    self.game.board[interceptor.field][0],
+                    self.game.board[field][0],
                     interceptor,
                     None,
-                    utils.bo,
-                    utils.ob,
-                    utils.check,
+                    self.game.board,
+                    self.game.board,
+                    self.game.board_check,
                 )
                 if mv.isthisallowed() and mv.noroadblocks():
-                    utils.update(
+                    self.game.update(
                         interceptor,
-                        utils.bo[field][0][0],
-                        utils.bo[field][0][1],
+                        self.game.board[field][0][0],
+                        self.game.board[field][0][1],
                         intercept=True,
                     )
-                    at = Attacked_fields(utils.intercept_bo, utils.ob)
-                    utils.check = at.get_dict_of_fields()
+                    at = Attacked_fields(self.game.board_intercept, self.game.board_code)
+                    self.game.board_check = at.get_dict_of_fields()
                     # put interceptor back where he was so that his field does not change for loop
-                    utils.update(
-                        interceptor, utils.bo[origin][0][0], utils.bo[origin][0][1]
+                    self.game.update(
+                        interceptor, self.game.board[origin][0][0], self.game.board[origin][0][1]
                     )
                     if not self.king_in_check():
                         return True
@@ -154,12 +154,12 @@ class Check_game_over:
         color = 'black'
         if self.color == 'black':
             color = 'white'
-        self.king = utils.find_king(color)
+        self.king = self.game.find_king(color)
         check = False
-        if self.king.color == 'black' and utils.check[self.king.field] in [-1, 2]:
+        if self.king.color == 'black' and self.game.board_check[self.king.field] in [-1, 2]:
             check = True
 
-        if self.king.color == 'white' and utils.check[self.king.field] in [1, 2]:
+        if self.king.color == 'white' and self.game.board_check[self.king.field] in [1, 2]:
             check = True
 
         if check:

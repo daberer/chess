@@ -1,17 +1,12 @@
 import pygame, random
 from move import Move
-
+from procedure import Game
 from game_over import Check_game_over
 import utils
 
 pygame.init()
 
 GREEN = (20, 255, 140)
-GREY = (210, 210, 210)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-PURPLE = (255, 0, 255)
-BLACK = (0, 0, 0)
 LIGHT = (242, 218, 182)
 DARK = (181, 135, 99)
 
@@ -28,12 +23,12 @@ font = pygame.font.SysFont(None, 100)
 utils.all_sprites_list = pygame.sprite.Group()
 
 
-for i, field in enumerate(utils.bo):
-    co, ty = utils.fen_code(utils.start_fen[i])
-    if ty is not None:
-        piece = utils.set_up_piece(co, utils.bo[field][0], ty, field)
-        utils.bo[field][1] = piece
-        utils.all_sprites_list.add(piece)
+game = Game()
+game.create_boards()
+game.fill_board()
+
+
+
 
 
 # Allowing the user to close the window...
@@ -95,12 +90,12 @@ def find_best_move(possible_pieces, enemy_pieces):
     for piece in possible_pieces:
         for enemy in enemy_pieces:
             mv = Move(
-                utils.bo[piece.field][0],
-                utils.bo[enemy.field][0],
+                game.board[piece.field][0],
+                game.board[enemy.field][0],
                 piece,
                 enemy,
-                utils.bo,
-                utils.ob,
+                game.board,
+                game.board_code,
                 utils.check,
             )
             if mv.isthisallowed() and mv.noroadblocks():
@@ -113,21 +108,21 @@ def find_best_move(possible_pieces, enemy_pieces):
     return []
 
 
-def execute_move(move_count, computer_move=False):
-    utils.recreate_checkdict()
+def execute_move(white_move, computer_move=False):
+    game.recreate_checkdict()
     col = 'black'
-    if move_count % 2 == 0:
+    if white_move:
         col = 'white'
     if computer_move:
         possible_pieces = [
-            utils.bo[b][1]
-            for b in utils.bo
-            if utils.bo[b][1] != None and utils.bo[b][1].color == col
+            game.board[b][1]
+            for b in game.board
+            if game.board[b][1] != None and game.board[b][1].color == col
         ]
         enemy_pieces = [
-            utils.bo[b][1]
-            for b in utils.bo
-            if utils.bo[b][1] != None and utils.bo[b][1].color != col
+            game.board[b][1]
+            for b in game.board
+            if game.board[b][1] != None and game.board[b][1].color != col
         ]
         VIP_target = find_best_move(possible_pieces, enemy_pieces)
 
@@ -135,8 +130,8 @@ def execute_move(move_count, computer_move=False):
             utils.legal(
                 VIP_target[3],
                 VIP_target[1],
-                utils.bo[VIP_target[2].field][0][0],
-                utils.bo[VIP_target[2].field][0][1],
+                game.board[VIP_target[2].field][0][0],
+                game.board[VIP_target[2].field][0][1],
                 VIP_target[2],
             )
             return True
@@ -145,8 +140,8 @@ def execute_move(move_count, computer_move=False):
 
         possible_fields = [
             b
-            for b in utils.bo
-            if not utils.bo[b][1] or (utils.bo[b][1] and utils.bo[b][1].color != col)
+            for b in game.board
+            if not game.board[b][1] or (game.board[b][1] and game.board[b][1].color != col)
         ]
 
         weights = get_weights(piece.name(), col)
@@ -158,49 +153,52 @@ def execute_move(move_count, computer_move=False):
         while len(possible_fields):
             goal = random.choice(possible_fields)
             possible_fields.remove(goal)
-            old_occupant = utils.bo[goal][1]
+            old_occupant = game.board[goal][1]
             mv = Move(
-                utils.bo[piece.field][0],
-                utils.bo[goal][0],
+                game.board[piece.field][0],
+                game.board[goal][0],
                 piece,
                 old_occupant,
-                utils.bo,
-                utils.ob,
+                game.board,
+                game.board_code,
             )
             if utils.legal(
-                mv, piece, utils.bo[goal][0][0], utils.bo[goal][0][1], old_occupant
+                mv, piece, game.board[goal][0][0], game.board[goal][0][1], old_occupant
             ):
                 return True
 
     if len(pl.carry_pieces_list) > 0:
         piece = pl.carry_pieces_list[0]
+        game.activate_piece(pl.carry_pieces_list[0])
         pl.carry_pieces_list = []
 
-        if move_count % 2 == 0 and piece.color == 'black':
-            utils.go_home(piece)
-        elif move_count % 2 != 0 and piece.color == 'white':
-            utils.go_home(piece)
-        piecex = round(piece.rect.x, -2)
-        piecey = round(piece.rect.y, -2)
+        if game.turn and game.active_piece.color == 'black':
+            game.go_home(game.active_piece)
+        elif not game.turn and game.active_piece.color == 'white':
+            game.go_home(game.active_piece)
+        piecex = round(game.active_piece.rect.x, -2)
+        piecey = round(game.active_piece.rect.y, -2)
 
-        old_occupant = utils.bo[utils.ob[piecex, piecey]][1]
+
+        old_occupant = game.board[game.board_code[piecex, piecey]][1]
+
         mv = Move(
-            utils.bo[piece.field][0],
+            game.board[piece.field][0],
             (piecex, piecey),
             piece,
             old_occupant,
-            utils.bo,
-            utils.ob,
-            utils.check,
+            game.board,
+            game.board_code,
+            game.board_check,
         )
-        ret = utils.legal(mv, piece, piecex, piecey, old_occupant)
-        utils.recreate_checkdict()
-        go = Check_game_over(piece.color)
+        ret = game.legal(mv, piece, piecex, piecey, old_occupant)
+        game.recreate_checkdict()
+        go = Check_game_over(piece.color, game)
         return ret, go.checkmate()
 
 
-def end_game(move_count):
-    if move_count % 2 == 0:
+def end_game():
+    if game.turn:
         color = 'White'
     else:
         color = 'Black'
@@ -221,10 +219,10 @@ def draw_board():
             pygame.draw.rect(screen, LIGHT, pygame.Rect(field[0], field[1], 100, 100))
 
 
-game_over = False
-move_count = 0
-utils.recreate_checkdict()
-auto = False
+
+
+game.recreate_checkdict()
+
 while carryOn:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -244,23 +242,23 @@ while carryOn:
                 pl.carry_pieces_list = blocks_hit_list
 
         elif event.type == pygame.MOUSEBUTTONUP:
-            correct_move, check_status = execute_move(move_count, computer_move=False)
+            correct_move, check_status = execute_move(game.turn, computer_move=False)
             game_over, check_given = check_status
             if correct_move:
-                move_count += 1
-                if move_count % 2 == 0:
+                game.next_move()
+                if game.turn:
                     cap = "Chess - whites turn "
                 else:
                     cap = "Chess - blacks turn "
                 if check_given:
                     cap += '- check'
-                    utils.check_given = True
+                    game.check_given = True
                 else:
-                    utils.check_given = False
+                    game.check_given = False
                 pygame.display.set_caption(cap)
             else:
                 if len(blocks_hit_list): # if touched piece is going to some illegal field, hop back wher it came from
-                    utils.go_home(blocks_hit_list[0])
+                    game.go_home(blocks_hit_list[0])
 
 
 
@@ -283,7 +281,7 @@ while carryOn:
         # Refresh Screen
         pygame.display.flip()
         if game_over:
-            end_game(move_count - 1)
+            end_game()
 
         # Number of frames per secong e.g. 60
         clock.tick(200)
