@@ -124,7 +124,7 @@ class Check_game_over:
                     interceptor,
                     None,
                     self.game.board,
-                    self.game.board,
+                    self.game.board_code,
                     self.game.board_check,
                 )
                 if mv.isthisallowed() and mv.noroadblocks():
@@ -156,7 +156,8 @@ class Check_game_over:
             color = 'white'
         self.king = self.game.find_king(color)
         check = False
-        if self.king.color == 'black' and self.game.board_check[self.king.field] in [-1, 2]:
+
+        if self.king.color == 'black' and self.game.board_check[self.king.field] in [-1, 1]:
             check = True
 
         if self.king.color == 'white' and self.game.board_check[self.king.field] in [1, 2]:

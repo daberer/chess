@@ -19,7 +19,6 @@ class Game():
         self.black_gameover = False
         self.white_castle = False
         self.black_castle = False
-        self.attacked_fields = None
         self.active_piece = None
 
     def next_move(self):
@@ -28,7 +27,7 @@ class Game():
 
     def recreate_checkdict(self):
         at = Attacked_fields(self.board, self.board_code)
-        self.attacked_fields = at.get_dict_of_fields()
+        self.board_check = at.get_dict_of_fields()
 
     def activate_piece(self, piece):
         self.active_piece = piece
@@ -192,10 +191,14 @@ class Game():
                 move.old_occupant.field,
             )
             move.old_occupant.kill()
+        else:
+            self.update(self.active_piece, self.active_piece.rect.x, self.active_piece.rect.y, True)
 
 
-        if (king.color == 'black' and self.attacked_fields[king.field] not in [-1, 1]) or (
-            king.color == 'white' and self.attacked_fields[king.field] not in [1, 2]
+
+        self.recreate_checkdict()
+        if (king.color == 'black' and self.board_check[king.field] not in [-1, 1]) or (
+            king.color == 'white' and self.board_check[king.field] not in [1, 2]
         ):
             self.update(piece, self.board[origin][0][0], self.board[origin][0][1], False)
             if move.old_occupant:

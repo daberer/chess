@@ -242,23 +242,24 @@ while carryOn:
                 pl.carry_pieces_list = blocks_hit_list
 
         elif event.type == pygame.MOUSEBUTTONUP:
-            correct_move, check_status = execute_move(game.turn, computer_move=False)
-            game_over, check_given = check_status
-            if correct_move:
-                game.next_move()
-                if game.turn:
-                    cap = "Chess - whites turn "
+            if len(pl.carry_pieces_list) > 0: # False if just clicking into an empty field
+                correct_move, check_status = execute_move(game.turn, computer_move=False)
+                game_over, check_given = check_status
+                if correct_move:
+                    game.next_move()
+                    if game.turn:
+                        cap = "Chess - whites turn "
+                    else:
+                        cap = "Chess - blacks turn "
+                    if check_given:
+                        cap += '- check'
+                        game.check_given = True
+                    else:
+                        game.check_given = False
+                    pygame.display.set_caption(cap)
                 else:
-                    cap = "Chess - blacks turn "
-                if check_given:
-                    cap += '- check'
-                    game.check_given = True
-                else:
-                    game.check_given = False
-                pygame.display.set_caption(cap)
-            else:
-                if len(blocks_hit_list): # if touched piece is going to some illegal field, hop back wher it came from
-                    game.go_home(blocks_hit_list[0])
+                    if len(blocks_hit_list): # if touched piece is going to some illegal field, hop back wher it came from
+                        game.go_home(blocks_hit_list[0])
 
 
 

@@ -60,7 +60,7 @@ class Attacked_fields:
 
     def nanify_dict(self):
         """
-        adapts dict to have nan values. Now each field can be checked if smaller than 2 (True if attacked by white or both)
+        adapts dict to have nan values. Now each field can be checked if -1 or 1 (True if attacked by white or both)
         or larger than 0 (True if attacked by black or both)
         :param di:
         :return:
