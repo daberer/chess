@@ -86,13 +86,11 @@ class Check_game_over:
             for enemy in enemies:
                 go_back_to_bo()
                 mv = Move(
-                    self.game.board[interceptor.field][0],
-                    self.game.board[enemy.field][0],
-                    interceptor,
-                    enemy,
-                    self.game.board,
-                    self.game.board_code,
-                    self.game.board_check,
+                    old_field=self.game.board[interceptor.field][0],
+                    new_field=self.game.board[enemy.field][0],
+                    piece=interceptor,
+                    old_occupant=enemy,
+                    game=self.game
                 )
                 # look if we can take down piece
                 if mv.isthisallowed() and mv.noroadblocks():
@@ -119,13 +117,11 @@ class Check_game_over:
             for field in empty_fields:
                 go_back_to_bo()
                 mv = Move(
-                    self.game.board[interceptor.field][0],
-                    self.game.board[field][0],
-                    interceptor,
-                    None,
-                    self.game.board,
-                    self.game.board_code,
-                    self.game.board_check,
+                    old_field=self.game.board[interceptor.field][0],
+                    new_field=self.game.board[field][0],
+                    piece=interceptor,
+                    old_occupant=None,
+                    game=self.game
                 )
                 if mv.isthisallowed() and mv.noroadblocks():
                     self.game.update(

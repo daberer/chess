@@ -4,8 +4,7 @@ import utils
 
 class Move:
     def __init__(
-        self, old_field, new_field, piece, old_occupant, bo, ob, check_dict=None
-    ):
+        self, old_field, new_field, piece, old_occupant, game=None):
         self.old_field = old_field
         self.new_field = new_field
         self.piece = piece
@@ -13,12 +12,8 @@ class Move:
         self.diff = tuple(map(lambda i, j: i - j, self.new_field, self.old_field))
         self.dist = round(math.hypot(self.diff[0], self.diff[1]), 2)
         self.old_occupant = old_occupant
-        self.bo = bo
-        self.ob = ob
-        self.check_dict = check_dict
+        self.game = game
 
-    def update_check_dict(self, up_dict):
-        self.check_dict = up_dict
 
     def noroadblocks(self):
         if self.piece.name() not in ['Pawn', 'Bishop', 'Rook', 'Queen']:
@@ -27,10 +22,10 @@ class Move:
         # if round(self.dist % 100, 2) == 0:
         #     diagonal = False
         ontheway = self.get_fields_on_the_way(
-            self.ob[self.old_field], self.ob[self.new_field]
+            self.game.board_code[self.old_field], self.game.board_code[self.new_field]
         )
         for block in ontheway:
-            if self.bo[block][1] != None:
+            if self.game.board[block][1] != None:
                 return False
         return True
 
@@ -106,26 +101,26 @@ class Move:
         :return:
         """
         if self.dist == 141.42 or self.dist == 100:
-            if self.piece.color == 'black' and not self.check_dict[
-                self.ob[self.new_field]
+            if self.piece.color == 'black' and not self.game.board_check[
+                self.game.board_code[self.new_field]
             ] in [-1, 1]:
                 self.piece.castle = False  # no more castling
                 return True
-            if self.piece.color == 'white' and not self.check_dict[
-                self.ob[self.new_field]
+            if self.piece.color == 'white' and not self.game.board_check[
+                self.game.board_code[self.new_field]
             ] in [1, 2]:
                 self.piece.castle = False
                 return True
 
         # castling
         elif (
-            self.ob[self.old_field][1] == self.ob[self.new_field][1]
+            self.game.board_code[self.old_field][1] == self.game.board_code[self.new_field][1]
         ):  # horizontal movement
 
             # kingside castle
             if (
                 self.dist == 200
-                and (ord(self.ob[self.old_field][0]) < ord(self.ob[self.new_field][0]))
+                and (ord(self.game.board_code[self.old_field][0]) < ord(self.game.board_code[self.new_field][0]))
                 and not self.old_occupant
             ):
                 if self.rook_ready_to_castle():
@@ -134,7 +129,7 @@ class Move:
             # queenside castle
             elif (
                 self.dist == 200
-                and (ord(self.ob[self.old_field][0]) > ord(self.ob[self.new_field][0]))
+                and (ord(self.game.board_code[self.old_field][0]) > ord(self.game.board_code[self.new_field][0]))
                 and not self.old_occupant
             ):
                 if self.rook_ready_to_castle(queenside=True):
@@ -148,23 +143,23 @@ class Move:
         :return:
         """
         if not queenside:
-            rook_homefield = self.ob[self.add_two_tuples(self.new_field, (100, 0))]
+            rook_homefield = self.game.board_code[self.add_two_tuples(self.new_field, (100, 0))]
             rook_newfield = self.add_two_tuples(self.new_field, (-100, 0))
         else:
-            rook_homefield = self.ob[self.add_two_tuples(self.new_field, self.diff)]
+            rook_homefield = self.game.board_code[self.add_two_tuples(self.new_field, self.diff)]
             rook_newfield = self.add_two_tuples(self.new_field, (100, 0))
 
-        if self.bo[rook_homefield] != None:
-            if self.bo[rook_homefield][1].name() == 'Rook':
-                if self.bo[rook_homefield][1].castle == True:
-                    self.bo[rook_homefield][1].kill()
+        if self.game.board[rook_homefield] != None:
+            if self.game.board[rook_homefield][1].name() == 'Rook':
+                if self.game.board[rook_homefield][1].castle == True:
+                    self.game.board[rook_homefield][1].kill()
                     import chess_pieces
 
-                    new_rook = utils.set_up_piece(
+                    new_rook = self.game.set_up_piece(
                         color=self.piece.color,
                         coordinate_tuple=rook_newfield,
                         kind=chess_pieces.Rook,
-                        field=self.ob[rook_newfield],
+                        field=self.game.board_code[rook_newfield],
                     )
                     utils.all_sprites_list.add(new_rook)
                     return True

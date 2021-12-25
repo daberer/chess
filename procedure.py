@@ -21,6 +21,7 @@ class Game():
         self.black_castle = False
         self.active_piece = None
 
+
     def next_move(self):
         self.move_count +=1
         self.turn = not self.turn
@@ -191,8 +192,8 @@ class Game():
                 move.old_occupant.field,
             )
             move.old_occupant.kill()
-        else:
-            self.update(self.active_piece, self.active_piece.rect.x, self.active_piece.rect.y, True)
+
+        self.update(self.active_piece, self.active_piece.rect.x, self.active_piece.rect.y, True)
 
 
 

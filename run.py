@@ -90,13 +90,11 @@ def find_best_move(possible_pieces, enemy_pieces):
     for piece in possible_pieces:
         for enemy in enemy_pieces:
             mv = Move(
-                game.board[piece.field][0],
-                game.board[enemy.field][0],
-                piece,
-                enemy,
-                game.board,
-                game.board_code,
-                utils.check,
+                old_field=game.board[piece.field][0],
+                new_field=game.board[enemy.field][0],
+                piece=piece,
+                old_occupant=enemy,
+                game=game
             )
             if mv.isthisallowed() and mv.noroadblocks():
                 net_worth = worth_of_piece(enemy)
@@ -155,12 +153,11 @@ def execute_move(white_move, computer_move=False):
             possible_fields.remove(goal)
             old_occupant = game.board[goal][1]
             mv = Move(
-                game.board[piece.field][0],
-                game.board[goal][0],
-                piece,
-                old_occupant,
-                game.board,
-                game.board_code,
+                old_field=game.board[piece.field][0],
+                new_field=game.board[goal][0],
+                piece=piece,
+                old_occupant=old_occupant,
+                game=game
             )
             if utils.legal(
                 mv, piece, game.board[goal][0][0], game.board[goal][0][1], old_occupant
@@ -176,22 +173,20 @@ def execute_move(white_move, computer_move=False):
             game.go_home(game.active_piece)
         elif not game.turn and game.active_piece.color == 'white':
             game.go_home(game.active_piece)
-        piecex = round(game.active_piece.rect.x, -2)
-        piecey = round(game.active_piece.rect.y, -2)
+        game.active_piece.rect.x = round(game.active_piece.rect.x, -2)
+        game.active_piece.rect.y = round(game.active_piece.rect.y, -2)
 
 
-        old_occupant = game.board[game.board_code[piecex, piecey]][1]
+        old_occupant = game.board[game.board_code[game.active_piece.rect.x, game.active_piece.rect.y]][1]
 
         mv = Move(
-            game.board[piece.field][0],
-            (piecex, piecey),
-            piece,
-            old_occupant,
-            game.board,
-            game.board_code,
-            game.board_check,
+            old_field=game.board[piece.field][0],
+            new_field=(game.active_piece.rect.x, game.active_piece.rect.y),
+            piece=piece,
+            old_occupant=old_occupant,
+            game=game
         )
-        ret = game.legal(mv, piece, piecex, piecey, old_occupant)
+        ret = game.legal(mv, piece, game.active_piece.rect.x, game.active_piece.rect.y, old_occupant)
         game.recreate_checkdict()
         go = Check_game_over(piece.color, game)
         return ret, go.checkmate()
