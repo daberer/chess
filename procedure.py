@@ -251,8 +251,6 @@ class Game():
             piece.field = self.board_code[piecex, piecey]
             return True
 
-        print('deal with piece that stepped in between')
-        print('deal with piece that takes other piece')
         return False
 
     def enpassant_expired(self, col):

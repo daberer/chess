@@ -133,10 +133,23 @@ class Move:
             self.game.board_code[self.old_field][1] == self.game.board_code[self.new_field][1]
         ):  # horizontal movement
 
+
+            def all_clear(old, new, color):
+                """Checks if one of the 3 fields the kings moves on for castling is under threat"""
+                mid = (int((old[0] + new[0]) / 2), old[1])
+                for field in [old, mid, new]:
+                    field_code = self.game.board_code[field]
+                    if color == 'black' and self.game.board_check[field_code] in [-1, 1]:
+                        return False
+                    if color == 'white' and self.game.board_check[field_code] in [1, 2]:
+                        return False
+                return True
+
             # kingside castle
             if (
                 self.dist == 200
                 and (ord(self.game.board_code[self.old_field][0]) < ord(self.game.board_code[self.new_field][0]))
+                and all_clear(self.old_field, self.new_field, self.piece.color)
                 and not self.old_occupant
             ):
                 if self.rook_ready_to_castle():
@@ -146,6 +159,7 @@ class Move:
             elif (
                 self.dist == 200
                 and (ord(self.game.board_code[self.old_field][0]) > ord(self.game.board_code[self.new_field][0]))
+                and all_clear(self.old_field, self.new_field, self.piece.color)
                 and not self.old_occupant
             ):
                 if self.rook_ready_to_castle(queenside=True):
@@ -176,7 +190,6 @@ class Move:
                         coordinate_tuple=rook_newfield,
                         kind=chess_pieces.Rook,
                         field=self.game.board_code[rook_newfield],
-                        castle=False
                     )
                     utils.all_sprites_list.add(new_rook)
                     return True
@@ -218,6 +231,7 @@ class Move:
         return ret
 
     def find_enpassanting_pawn(self):
+        """If it exists it returns the one Pawn that can be taken enpassant"""
         for k in self.game.board:
             if self.game.board[k][1] != None:
                 if self.game.board[k][1].name() == 'Pawn':
