@@ -183,6 +183,7 @@ class Move:
             if self.game.board[rook_homefield][1].name() == 'Rook':
                 if self.game.board[rook_homefield][1].castle == True:
                     self.game.board[rook_homefield][1].kill()
+                    self.game.board[rook_homefield][1] = None
                     import chess_pieces
 
                     new_rook = self.game.set_up_piece(
