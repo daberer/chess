@@ -3,7 +3,6 @@ import utils
 
 WHITE = (255, 255, 255)
 
-
 class Piece(pygame.sprite.Sprite):
     def __init__(self, color, field):
         super().__init__()
@@ -21,7 +20,7 @@ class Piece(pygame.sprite.Sprite):
 
 
 class Pawn(Piece):
-    def __init__(self, color, field):
+    def __init__(self, color, field, enpassant=False):
         # Call the parent class (Sprite) constructor
         super().__init__(color, field)
 
@@ -33,6 +32,7 @@ class Pawn(Piece):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
+        self.enpassant = enpassant
 
 
 class Knight(Piece):
@@ -63,6 +63,7 @@ class Bishop(Piece):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
+
 
 
 class Rook(Piece):

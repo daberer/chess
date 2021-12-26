@@ -111,6 +111,8 @@ def execute_move(white_move, computer_move=False):
     col = 'black'
     if white_move:
         col = 'white'
+    game.enpassant_expired(col) #possible enpassant only for 1 round
+
     if computer_move:
         possible_pieces = [
             game.board[b][1]

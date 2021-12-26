@@ -255,6 +255,16 @@ class Game():
         print('deal with piece that takes other piece')
         return False
 
+    def enpassant_expired(self, col):
+        """Chance for enpassanting Pawn is over"""
+        for k in self.board:
+            if self.board[k][1] != None:
+                if self.board[k][1].name() == 'Pawn' and self.board[k][1].color == col:
+                    self.board[k][1].enpassant = False
+
+
+
+
 
 
 

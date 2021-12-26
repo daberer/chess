@@ -108,6 +108,7 @@ class Attacked_fields:
             ):
                 right.append(k)
             else:
+                right.append(k)
                 break
         for l in [
             chr(j) + str(nu)
@@ -120,6 +121,7 @@ class Attacked_fields:
             ):
                 left.append(l)
             else:
+                left.append(l)
                 break
         for m in [chr(ch) + str(j) for j in [i for i in range(nu - 1, 0, -1)]]:
             if self.bo[m][1] == None or (
@@ -128,6 +130,7 @@ class Attacked_fields:
             ):
                 down.append(m)
             else:
+                down.append(m)
                 break
         for n in [chr(ch) + str(j) for j in [i for i in range(nu + 1, 9)]]:
             if self.bo[n][1] == None or (
@@ -136,6 +139,7 @@ class Attacked_fields:
             ):
                 up.append(n)
             else:
+                up.append(n)
                 break
         return left + right + up + down
 
@@ -157,6 +161,7 @@ class Attacked_fields:
             ):
                 upright.append(k)
             else:
+                upright.append(k)
                 break
         for l in [
             chr(ch - j) + str(nu + i + 1)
@@ -169,6 +174,7 @@ class Attacked_fields:
             ):
                 upleft.append(l)
             else:
+                upleft.append(l)
                 break
         for m in [
             chr(j + ch) + str(nu - 1 - i)
@@ -181,6 +187,7 @@ class Attacked_fields:
             ):
                 downright.append(m)
             else:
+                downright.append(m)
                 break
         for n in [
             chr(ch - j) + str(nu - i - 1)
@@ -193,6 +200,7 @@ class Attacked_fields:
             ):
                 upright.append(n)
             else:
+                upright.append(n)
                 break
         return upleft + upright + downleft + downright
 
