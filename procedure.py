@@ -193,7 +193,7 @@ class Game():
             )
             move.old_occupant.kill()
 
-        self.update(self.active_piece, self.active_piece.rect.x, self.active_piece.rect.y, True)
+        queen = self.update(self.active_piece, self.active_piece.rect.x, self.active_piece.rect.y, True)
 
 
 
@@ -201,6 +201,10 @@ class Game():
         if (king.color == 'black' and self.board_check[king.field] not in [-1, 1]) or (
             king.color == 'white' and self.board_check[king.field] not in [1, 2]
         ):
+            if queen:
+                queen.kill()
+                self.board[queen.field][1] = None
+
             self.update(piece, self.board[origin][0][0], self.board[origin][0][1], False)
             if move.old_occupant:
                 old_occupant = self.set_up_piece(col, (x, y), ty, fd)
@@ -231,13 +235,25 @@ class Game():
         :param intercept: if the updated dict is a hypothetical dict not real board
         :return:
         """
+        queen_created = False # if a queen is created and hypothetical intercept move is considered, queen needs to be
+        # removed later
         if piece.name() == 'Pawn' and (
             (piece.color == 'white' and piecey == 0)
             or (piece.color == 'black' and piecey == 700)
         ):
             field = piece.field
             piece.kill()
+            self.board[field][1] = None # Not just kill but erase from self.board
             piece = self.set_up_piece(piece.color, (piecex, piecey), Queen, field)
+            queen_created = True
+            # duplicate_piece = False
+            # ### TODO: find nicer solution. Currently spawning 2 Queens because of hypothetical_move_check_function
+            # for sprite in utils.all_sprites_list:
+            #     if hasattr(sprite, 'field'):
+            #         if sprite.field == piece.field:
+            #             duplicate_piece = True
+            # if not duplicate_piece:
+            #
             utils.all_sprites_list.add(piece)
 
         if intercept:
@@ -245,6 +261,9 @@ class Game():
             self.board_intercept[self.board_code[piecex, piecey]][1] = piece
             self.board_intercept[piece.field][1] = None
             piece.field = self.board_code[piecex, piecey]
+            if queen_created:
+                return piece
+
         else:
             self.board[self.board_code[piecex, piecey]][1] = piece
             self.board[piece.field][1] = None
