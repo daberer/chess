@@ -193,6 +193,7 @@ class Move:
                         kind=chess_pieces.Rook,
                         field=self.game.board_code[rook_newfield],
                     )
+                    self.game.board[self.game.board_code[rook_newfield]][1] = new_rook
                     utils.all_sprites_list.add(new_rook)
                     return True
         return False

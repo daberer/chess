@@ -196,9 +196,9 @@ def execute_move(white_move, computer_move=False):
 
 def end_game():
     if game.turn:
-        color = 'White'
-    else:
         color = 'Black'
+    else:
+        color = 'White'
     text_surface = font.render(f'{color} wins!', True, (64, 224, 208))
     screen.blit(text_surface, dest=(200, 350))
     pygame.display.flip()
