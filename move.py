@@ -76,6 +76,7 @@ class Move:
                     if (self.piece.color == 'white' and self.diff[1] < 0 or self.piece.color == 'black' and self.diff[1] > 0) \
                             and self.old_field[1] == en_pawn_field[1]: # pos1 represents movement in x-axis
                         en_pawn.kill()
+                        self.game.board[en_pawn.field][1] = None
                         return True
             if self.piece.color == 'white' and self.diff[1] < 0 and self.old_occupant:
                 return True
