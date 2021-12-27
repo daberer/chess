@@ -212,8 +212,6 @@ def draw_board():
             pygame.draw.rect(screen, LIGHT, pygame.Rect(field[0], field[1], 100, 100))
 
 
-
-
 game.recreate_checkdict()
 
 while carryOn:
