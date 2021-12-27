@@ -1,5 +1,5 @@
 import pygame
-import utils
+
 
 WHITE = (255, 255, 255)
 

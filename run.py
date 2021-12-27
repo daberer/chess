@@ -1,8 +1,8 @@
 import pygame, random
 from move import Move
-from procedure import Game
+from procedure import Game, Sprites
 from game_over import Check_game_over
-import utils
+from chess_pieces import Player
 
 pygame.init()
 
@@ -19,24 +19,20 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Chess - whites turn")
 font = pygame.font.SysFont(None, 100)
 
-# This will be a list that will contain all the sprites we intend to use in our game.
-utils.all_sprites_list = pygame.sprite.Group()
-
-
 game = Game()
+
+# This will be a list that will contain all the sprites we intend to use in our game.
+Sprites.all_sprites_list = pygame.sprite.Group()
 game.create_boards()
 game.fill_board()
-
-
-
 
 
 # Allowing the user to close the window...
 carryOn = True
 clock = pygame.time.Clock()
 score = 0
-pl = utils.Player()
-utils.all_sprites_list.add(pl)
+pl = Player()
+Sprites.all_sprites_list.add(pl)
 
 
 # Drawing on Screen
@@ -127,7 +123,7 @@ def execute_move(white_move, computer_move=False):
         VIP_target = find_best_move(possible_pieces, enemy_pieces)
 
         if VIP_target:
-            utils.legal(
+            game.legal(
                 VIP_target[3],
                 VIP_target[1],
                 game.board[VIP_target[2].field][0][0],
@@ -161,7 +157,7 @@ def execute_move(white_move, computer_move=False):
                 old_occupant=old_occupant,
                 game=game
             )
-            if utils.legal(
+            if game.legal(
                 mv, piece, game.board[goal][0][0], game.board[goal][0][1], old_occupant
             ):
                 return True
@@ -227,7 +223,7 @@ while carryOn:
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             blocks_hit_list = pygame.sprite.spritecollide(
-                pl, utils.all_sprites_list, False
+                pl, Sprites.all_sprites_list, False
             )
             for i, block in enumerate(blocks_hit_list):
                 if block.name() == 'Player':
@@ -271,10 +267,10 @@ while carryOn:
 
         draw_board()
 
-        utils.all_sprites_list.update()
+        Sprites.all_sprites_list.update()
 
         # Now let's draw all the sprites in one go.
-        utils.all_sprites_list.draw(screen)
+        Sprites.all_sprites_list.draw(screen)
 
         # Refresh Screen
         pygame.display.flip()

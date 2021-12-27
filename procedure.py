@@ -1,6 +1,84 @@
 from check import Attacked_fields
-from chess_pieces import Queen
-import utils
+from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King
+import re
+
+# translate field into x,y
+def fen_code(sign):
+    """
+    translates Forsyth-Edward-Notation into the corresponding chess piece
+    :param sign: str of fen code
+    :return: color and type of piece
+    """
+    assert type(sign) == str
+    if sign.isupper():
+        col = 'white'
+    else:
+        col = 'black'
+    sign = sign.lower()
+    if sign == 'p':
+        ret = Pawn
+    elif sign == 'n':
+        ret = Knight
+    elif sign == 'b':
+        ret = Bishop
+    elif sign == 'r':
+        ret = Rook
+    elif sign == 'q':
+        ret = Queen
+    elif sign == 'k':
+        ret = King
+    elif sign == 'o':
+        ret = None
+    else:
+        raise Exception(f'{sign} is not a valid sign:')
+
+    return col, ret
+
+
+def fen_insert(st, length, ind):
+    """
+    inserts up to eight "o" characters into an input string instead of an integer 1-8 at a given index.
+    :param st: string, that is being added to
+    :param length: int, number of times "o" is being added to st
+    :param ind: int, index where int is located in st.
+    :return:
+    """
+    return st[:ind] + length * 'o' + st[ind + 1 :]
+
+
+def has_numbers(inputString):
+    """
+    Checks input string for numbers.
+    :param inputString:
+    :return: True if inputString has number.
+    """
+    return bool(re.search(r'\d', inputString))
+
+
+def extend_fen(fen):
+    """
+    replace the number for number of empty fields in the fen notation with 'o' times the number
+    rn3k becomes rnoook
+    :param fen:
+    :return:
+    """
+    ext_fen = (fen + '.')[:-1]
+    while has_numbers(ext_fen):
+        ind = None
+        match = re.search(r"\d", ext_fen)
+        if match:
+            ind = match.start()
+            ext_fen = fen_insert(ext_fen, int(ext_fen[ind]), ind)
+    return ext_fen
+
+class Sprites():
+    all_sprites_list = None
+
+start_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+# start_fen = "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR"
+check_given = False
+start_fen = start_fen.replace('/', '')
+start_fen = extend_fen(start_fen)
 
 class Game():
     """
@@ -76,11 +154,11 @@ class Game():
 
     def fill_board(self):
         for i, field in enumerate(self.board):
-            co, ty = utils.fen_code(utils.start_fen[i])
+            co, ty = fen_code(start_fen[i])
             if ty is not None:
                 piece = self.set_up_piece(co, self.board[field][0], ty, field)
                 self.board[field][1] = piece
-                utils.all_sprites_list.add(piece)
+                Sprites.all_sprites_list.add(piece)
 
     def legal(self, mv, piece, piecex, piecey, old_occupant):
         """
@@ -208,14 +286,14 @@ class Game():
             self.update(piece, self.board[origin][0][0], self.board[origin][0][1], False)
             if move.old_occupant:
                 old_occupant = self.set_up_piece(col, (x, y), ty, fd)
-                utils.all_sprites_list.add(old_occupant)
+                Sprites.all_sprites_list.add(old_occupant)
                 return True, old_occupant
             return True, None
 
         self.update(piece, self.board[origin][0][0], self.board[origin][0][1], False)
         if move.old_occupant:
             old_occupant = self.set_up_piece(col, (x, y), ty, fd)
-            utils.all_sprites_list.add(old_occupant)
+            Sprites.all_sprites_list.add(old_occupant)
         return False, None
 
 
@@ -246,15 +324,7 @@ class Game():
             self.board[field][1] = None # Not just kill but erase from self.board
             piece = self.set_up_piece(piece.color, (piecex, piecey), Queen, field)
             queen_created = True
-            # duplicate_piece = False
-            # ### TODO: find nicer solution. Currently spawning 2 Queens because of hypothetical_move_check_function
-            # for sprite in utils.all_sprites_list:
-            #     if hasattr(sprite, 'field'):
-            #         if sprite.field == piece.field:
-            #             duplicate_piece = True
-            # if not duplicate_piece:
-            #
-            utils.all_sprites_list.add(piece)
+            Sprites.all_sprites_list.add(piece)
 
         if intercept:
             self.board_intercept = {key: value for key, value in self.board.items()}
@@ -278,6 +348,7 @@ class Game():
             if self.board[k][1] != None:
                 if self.board[k][1].name() == 'Pawn' and self.board[k][1].color == col:
                     self.board[k][1].enpassant = False
+
 
 
 
