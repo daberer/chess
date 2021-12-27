@@ -63,7 +63,7 @@ class Game():
         ob = {}
         check = {}
         intercept_bo = {}
-        for x in range(1, 9):
+        for x in range(8, 0, -1):
             for y in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
                 bo[f"{y}{x}"] = [(self.loc(y + str(x))), None]
                 check[f"{y}{x}"] = 0

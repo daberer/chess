@@ -75,9 +75,9 @@ def extend_fen(fen):
 
 
 # TODO: fix fen set up (Queen and King are set conversly) or are they correct and the fen code was wrong?
-start_fen = 'rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR'
+start_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
 # start_fen = "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR"
 check_given = False
 start_fen = start_fen.replace('/', '')
 start_fen = extend_fen(start_fen)
-start_fen = start_fen[::-1]
+#start_fen = start_fen[::-1]
