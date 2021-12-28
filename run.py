@@ -6,12 +6,12 @@ from chess_pieces import Player
 
 pygame.init()
 
-#COLORS
+# COLORS
 GREEN = (20, 255, 140)
 LIGHT = (242, 218, 182)
 DARK = (181, 135, 99)
-LIGHT_GREEN = (204,208,129)
-DARK_GREEN = (171,160,81)
+LIGHT_GREEN = (204, 208, 129)
+DARK_GREEN = (171, 160, 81)
 RED = (157, 61, 70)
 
 SCREENWIDTH = 800
@@ -93,7 +93,7 @@ def find_best_move(possible_pieces, enemy_pieces):
                 new_field=game.board[enemy.field][0],
                 piece=piece,
                 old_occupant=enemy,
-                game=game
+                game=game,
             )
             if mv.isthisallowed() and mv.noroadblocks():
                 net_worth = worth_of_piece(enemy)
@@ -110,7 +110,7 @@ def execute_move(white_move, computer_move=False):
     col = 'black'
     if white_move:
         col = 'white'
-    game.enpassant_expired(col) #possible enpassant only for 1 round
+    game.enpassant_expired(col)  # possible enpassant only for 1 round
 
     if computer_move:
         possible_pieces = [
@@ -140,7 +140,8 @@ def execute_move(white_move, computer_move=False):
         possible_fields = [
             b
             for b in game.board
-            if not game.board[b][1] or (game.board[b][1] and game.board[b][1].color != col)
+            if not game.board[b][1]
+            or (game.board[b][1] and game.board[b][1].color != col)
         ]
 
         weights = get_weights(piece.name(), col)
@@ -158,7 +159,7 @@ def execute_move(white_move, computer_move=False):
                 new_field=game.board[goal][0],
                 piece=piece,
                 old_occupant=old_occupant,
-                game=game
+                game=game,
             )
             if game.legal(
                 mv, piece, game.board[goal][0][0], game.board[goal][0][1], old_occupant
@@ -177,18 +178,21 @@ def execute_move(white_move, computer_move=False):
         game.active_piece.rect.x = round(game.active_piece.rect.x, -2)
         game.active_piece.rect.y = round(game.active_piece.rect.y, -2)
 
-
-        old_occupant = game.board[game.board_code[game.active_piece.rect.x, game.active_piece.rect.y]][1]
+        old_occupant = game.board[
+            game.board_code[game.active_piece.rect.x, game.active_piece.rect.y]
+        ][1]
         origin = game.board[piece.field][0]
         new_field = (game.active_piece.rect.x, game.active_piece.rect.y)
         mv = Move(
-            old_field= origin,
-            new_field= new_field,
+            old_field=origin,
+            new_field=new_field,
             piece=piece,
             old_occupant=old_occupant,
-            game=game
+            game=game,
         )
-        ret = game.legal(mv, piece, game.active_piece.rect.x, game.active_piece.rect.y, old_occupant)
+        ret = game.legal(
+            mv, piece, game.active_piece.rect.x, game.active_piece.rect.y, old_occupant
+        )
         game.recreate_checkdict()
         go = Check_game_over(piece.color, game)
         return ret, go.checkmate(), origin, new_field
@@ -207,8 +211,10 @@ def end_game():
     time.sleep(5)
     pygame.quit()
 
+
 def draw_field(color, x, y):
     pygame.draw.rect(screen, color, pygame.Rect(x, y, 100, 100))
+
 
 def draw_board(origin_field=None, destination_field=None, check=None):
     king_field = (-99, -99)
@@ -220,7 +226,7 @@ def draw_board(origin_field=None, destination_field=None, check=None):
 
     for i, field in enumerate(fields):
         if field == king_field:
-           draw_field(RED, field[0], field[1])
+            draw_field(RED, field[0], field[1])
         elif (field == origin_field) or (field == destination_field):
             col = LIGHT_GREEN
             if (i + int(i / 8)) % 2 == 0:
@@ -235,8 +241,8 @@ def draw_board(origin_field=None, destination_field=None, check=None):
 
 game.recreate_checkdict()
 correct_move = False
-origin = (0,0)
-new_field = (0,0)
+origin = (0, 0)
+new_field = (0, 0)
 
 
 while carryOn:
@@ -258,8 +264,12 @@ while carryOn:
                 pl.carry_pieces_list = blocks_hit_list
 
         elif event.type == pygame.MOUSEBUTTONUP:
-            if len(pl.carry_pieces_list) > 0: # False if just clicking into an empty field
-                correct_move, check_status, origin, new_field = execute_move(game.turn, computer_move=False)
+            if (
+                len(pl.carry_pieces_list) > 0
+            ):  # False if just clicking into an empty field
+                correct_move, check_status, origin, new_field = execute_move(
+                    game.turn, computer_move=False
+                )
                 game_over, check_given = check_status
                 if correct_move:
                     game.next_move()
@@ -274,12 +284,15 @@ while carryOn:
                         game.check_given = False
                     pygame.display.set_caption(cap)
                 else:
-                    if len(blocks_hit_list): # if touched piece is going to some illegal field, hop back wher it came from
+                    if len(
+                        blocks_hit_list
+                    ):  # if touched piece is going to some illegal field, hop back wher it came from
                         game.go_home(blocks_hit_list[0])
 
-
         if correct_move:
-            draw_board(origin_field=origin, destination_field=new_field, check=game.check_given)
+            draw_board(
+                origin_field=origin, destination_field=new_field, check=game.check_given
+            )
         else:
             draw_board()
 

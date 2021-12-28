@@ -3,6 +3,7 @@ import pygame
 
 WHITE = (255, 255, 255)
 
+
 class Piece(pygame.sprite.Sprite):
     def __init__(self, color, field):
         super().__init__()
@@ -63,7 +64,6 @@ class Bishop(Piece):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
-
 
 
 class Rook(Piece):

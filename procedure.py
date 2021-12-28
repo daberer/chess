@@ -3,17 +3,17 @@ from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King
 import re
 
 
-
-class Sprites():
+class Sprites:
     """Holds list with sprites"""
+
     all_sprites_list = None
 
 
-
-class Game():
+class Game:
     """
     Creates a game object to have a game structure
     """
+
     def __init__(self, turn=True, board=None, fen=None, ob=None):
         self.turn = True
         self.move_count = 0
@@ -29,9 +29,8 @@ class Game():
         self.black_castle = False
         self.active_piece = None
 
-
     def next_move(self):
-        self.move_count +=1
+        self.move_count += 1
         self.turn = not self.turn
 
     def recreate_checkdict(self):
@@ -80,7 +79,7 @@ class Game():
         self.board = bo
         self.board_code = ob
         self.board_check = check
-        self.board_intercept =  intercept_bo
+        self.board_intercept = intercept_bo
 
     def fill_board(self):
         stat = Fen()
@@ -106,9 +105,10 @@ class Game():
         # check if move is legal
         if mv.isthisallowed():
             if mv.noroadblocks():
-                not_causes_check_bool, causes_check_old_occupant = self.not_causes_check(
-                    piece, mv
-                )
+                (
+                    not_causes_check_bool,
+                    causes_check_old_occupant,
+                ) = self.not_causes_check(piece, mv)
                 if not_causes_check_bool:
                     old_occupant = causes_check_old_occupant
                     mv.old_occupant = old_occupant
@@ -156,7 +156,6 @@ class Game():
         allowed, occupant = self.hypothetical_move_check(piece, move)
         return allowed, occupant
 
-
     def escape_check(self, piece, move):
         """
         in this move the King needs to leave check
@@ -170,7 +169,6 @@ class Game():
             return True, None
 
         return self.hypothetical_move_check(piece, move)
-
 
     def hypothetical_move_check(self, piece, move):
         """
@@ -202,9 +200,9 @@ class Game():
             )
             move.old_occupant.kill()
 
-        queen = self.update(self.active_piece, self.active_piece.rect.x, self.active_piece.rect.y, True)
-
-
+        queen = self.update(
+            self.active_piece, self.active_piece.rect.x, self.active_piece.rect.y, True
+        )
 
         self.recreate_checkdict()
         if (king.color == 'black' and self.board_check[king.field] not in [-1, 1]) or (
@@ -214,7 +212,9 @@ class Game():
                 queen.kill()
                 self.board[queen.field][1] = None
 
-            self.update(piece, self.board[origin][0][0], self.board[origin][0][1], False)
+            self.update(
+                piece, self.board[origin][0][0], self.board[origin][0][1], False
+            )
             if move.old_occupant:
                 old_occupant = self.set_up_piece(col, (x, y), ty, fd)
                 Sprites.all_sprites_list.add(old_occupant)
@@ -227,13 +227,11 @@ class Game():
             Sprites.all_sprites_list.add(old_occupant)
         return False, None
 
-
     def set_up_piece(self, color, coordinate_tuple, kind, field):
         piece = kind(color, field)
         piece.rect.x = coordinate_tuple[0]
         piece.rect.y = coordinate_tuple[1]
         return piece
-
 
     def update(self, piece, piecex, piecey, intercept=False):
         """
@@ -244,7 +242,7 @@ class Game():
         :param intercept: if the updated dict is a hypothetical dict not real board
         :return:
         """
-        queen_created = False # if a queen is created and hypothetical intercept move is considered, queen needs to be
+        queen_created = False  # if a queen is created and hypothetical intercept move is considered, queen needs to be
         # removed later
         if piece.name() == 'Pawn' and (
             (piece.color == 'white' and piecey == 0)
@@ -252,7 +250,7 @@ class Game():
         ):
             field = piece.field
             piece.kill()
-            self.board[field][1] = None # Not just kill but erase from self.board
+            self.board[field][1] = None  # Not just kill but erase from self.board
             piece = self.set_up_piece(piece.color, (piecex, piecey), Queen, field)
             queen_created = True
             Sprites.all_sprites_list.add(piece)
@@ -281,14 +279,14 @@ class Game():
                     self.board[k][1].enpassant = False
 
 
-class Fen():
+class Fen:
     """Class for Forsyth-Edwards-Notation"""
+
     def __init__(self):
         start_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         start_fen = start_fen.split(' ')[0]
         start_fen = start_fen.replace('/', '')
         self.start_fen = self.extend_fen(start_fen)
-
 
     # translate field into x,y
     def fen_code(self, sign):
@@ -322,7 +320,6 @@ class Fen():
 
         return col, ret
 
-
     def fen_insert(self, st, length, ind):
         """
         inserts up to eight "o" characters into an input string instead of an integer 1-8 at a given index.
@@ -333,7 +330,6 @@ class Fen():
         """
         return st[:ind] + length * 'o' + st[ind + 1 :]
 
-
     def has_numbers(self, inputString):
         """
         Checks input string for numbers.
@@ -341,7 +337,6 @@ class Fen():
         :return: True if inputString has number.
         """
         return bool(re.search(r'\d', inputString))
-
 
     def extend_fen(self, fen):
         """
@@ -358,8 +353,3 @@ class Fen():
                 ind = match.start()
                 ext_fen = self.fen_insert(ext_fen, int(ext_fen[ind]), ind)
         return ext_fen
-
-
-
-
-

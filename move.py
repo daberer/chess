@@ -2,10 +2,8 @@ import math
 from procedure import Sprites
 
 
-
 class Move:
-    def __init__(
-        self, old_field, new_field, piece, old_occupant, game=None):
+    def __init__(self, old_field, new_field, piece, old_occupant, game=None):
         self.old_field = old_field
         self.new_field = new_field
         self.piece = piece
@@ -14,7 +12,6 @@ class Move:
         self.dist = round(math.hypot(self.diff[0], self.diff[1]), 2)
         self.old_occupant = old_occupant
         self.game = game
-
 
     def noroadblocks(self):
         if self.piece.name() not in ['Pawn', 'Bishop', 'Rook', 'Queen']:
@@ -69,13 +66,21 @@ class Move:
 
         # move pawn diagonally
         if self.dist == 141.42:
-            #enpassant
+            # enpassant
             en_pawn_field, en_pawn = self.find_enpassanting_pawn()
             if en_pawn_field is not None:
-                en_pawn_diff = tuple(map(lambda i, j: i - j, en_pawn_field, self.old_field))
+                en_pawn_diff = tuple(
+                    map(lambda i, j: i - j, en_pawn_field, self.old_field)
+                )
                 if round(math.hypot(en_pawn_diff[0], en_pawn_diff[1]), 2) == 100:
-                    if (self.piece.color == 'white' and self.diff[1] < 0 or self.piece.color == 'black' and self.diff[1] > 0) \
-                            and self.old_field[1] == en_pawn_field[1]: # pos1 represents movement in x-axis
+                    if (
+                        self.piece.color == 'white'
+                        and self.diff[1] < 0
+                        or self.piece.color == 'black'
+                        and self.diff[1] > 0
+                    ) and self.old_field[1] == en_pawn_field[
+                        1
+                    ]:  # pos1 represents movement in x-axis
                         if not no_casualties:
                             en_pawn.kill()
                             self.game.board[en_pawn.field][1] = None
@@ -84,10 +89,6 @@ class Move:
                 return True
             if self.piece.color == 'black' and self.diff[1] > 0 and self.old_occupant:
                 return True
-
-
-
-
 
         return False
 
@@ -133,16 +134,19 @@ class Move:
 
         # castling
         elif (
-            self.game.board_code[self.old_field][1] == self.game.board_code[self.new_field][1]
+            self.game.board_code[self.old_field][1]
+            == self.game.board_code[self.new_field][1]
         ):  # horizontal movement
-
 
             def all_clear(old, new, color):
                 """Checks if one of the 3 fields the kings moves on for castling is under threat"""
                 mid = (int((old[0] + new[0]) / 2), old[1])
                 for field in [old, mid, new]:
                     field_code = self.game.board_code[field]
-                    if color == 'black' and self.game.board_check[field_code] in [-1, 1]:
+                    if color == 'black' and self.game.board_check[field_code] in [
+                        -1,
+                        1,
+                    ]:
                         return False
                     if color == 'white' and self.game.board_check[field_code] in [1, 2]:
                         return False
@@ -151,7 +155,10 @@ class Move:
             # kingside castle
             if (
                 self.dist == 200
-                and (ord(self.game.board_code[self.old_field][0]) < ord(self.game.board_code[self.new_field][0]))
+                and (
+                    ord(self.game.board_code[self.old_field][0])
+                    < ord(self.game.board_code[self.new_field][0])
+                )
                 and all_clear(self.old_field, self.new_field, self.piece.color)
                 and not self.old_occupant
             ):
@@ -161,7 +168,10 @@ class Move:
             # queenside castle
             elif (
                 self.dist == 200
-                and (ord(self.game.board_code[self.old_field][0]) > ord(self.game.board_code[self.new_field][0]))
+                and (
+                    ord(self.game.board_code[self.old_field][0])
+                    > ord(self.game.board_code[self.new_field][0])
+                )
                 and all_clear(self.old_field, self.new_field, self.piece.color)
                 and not self.old_occupant
             ):
@@ -176,10 +186,14 @@ class Move:
         :return:
         """
         if not queenside:
-            rook_homefield = self.game.board_code[self.add_two_tuples(self.new_field, (100, 0))]
+            rook_homefield = self.game.board_code[
+                self.add_two_tuples(self.new_field, (100, 0))
+            ]
             rook_newfield = self.add_two_tuples(self.new_field, (-100, 0))
         else:
-            rook_homefield = self.game.board_code[self.add_two_tuples(self.new_field, self.diff)]
+            rook_homefield = self.game.board_code[
+                self.add_two_tuples(self.new_field, self.diff)
+            ]
             rook_newfield = self.add_two_tuples(self.new_field, (100, 0))
 
         if self.game.board[rook_homefield] != None:

@@ -2,7 +2,6 @@ from move import Move
 from check import Attacked_fields
 
 
-
 class Check_game_over:
     def __init__(self, col, game):
         self.color = col
@@ -48,9 +47,13 @@ class Check_game_over:
         """
         if king:
             self.king = king
-        if self.king.color == 'black' and self.game.board_check[self.king.field] not in [-1, 1]:
+        if self.king.color == 'black' and self.game.board_check[
+            self.king.field
+        ] not in [-1, 1]:
             return False
-        if self.king.color == 'white' and self.game.board_check[self.king.field] not in [1, 2]:
+        if self.king.color == 'white' and self.game.board_check[
+            self.king.field
+        ] not in [1, 2]:
             return False
         return True
 
@@ -66,7 +69,9 @@ class Check_game_over:
             renew hypothetical dict
             :return:
             """
-            self.game.board_intercept = {key: value for key, value in self.game.board.items()}
+            self.game.board_intercept = {
+                key: value for key, value in self.game.board.items()
+            }
 
         # TODO prevent that they are the same thing!!!!!!
         interceptors = [
@@ -79,7 +84,9 @@ class Check_game_over:
             for b in self.game.board
             if self.game.board[b][1] != None and self.game.board[b][1].color != col
         ]
-        empty_fields = [b for b in self.game.board.keys() if self.game.board[b][1] == None]
+        empty_fields = [
+            b for b in self.game.board.keys() if self.game.board[b][1] == None
+        ]
         for interceptor in interceptors:
             origin = interceptor.field
             # check if someone on my team an kill someone of theirs to save the king
@@ -90,22 +97,28 @@ class Check_game_over:
                     new_field=self.game.board[enemy.field][0],
                     piece=interceptor,
                     old_occupant=enemy,
-                    game=self.game
+                    game=self.game,
                 )
                 # look if we can take down piece
-                if mv.isthisallowed(no_casualties = True) and mv.noroadblocks():
+                if mv.isthisallowed(no_casualties=True) and mv.noroadblocks():
                     self.game.update(
                         interceptor,
                         self.game.board[interceptor.field][0][0],
                         self.game.board[interceptor.field][0][1],
                         intercept=True,
                     )
-                    at = Attacked_fields(self.game.board_intercept, self.game.board_code)
+                    at = Attacked_fields(
+                        self.game.board_intercept, self.game.board_code
+                    )
                     # find all attacked fields but exclude the "taken" enemy
-                    self.game.board_check = at.get_dict_of_fields((enemy.name(), enemy.field))
+                    self.game.board_check = at.get_dict_of_fields(
+                        (enemy.name(), enemy.field)
+                    )
                     # piece = set_up_piece(piece.color, (piecex, piecey), Queen, field)
                     self.game.update(
-                        interceptor, self.game.board[origin][0][0], self.game.board[origin][0][1]
+                        interceptor,
+                        self.game.board[origin][0][0],
+                        self.game.board[origin][0][1],
                     )
                     go_back_to_bo()
                     if not self.king_in_check():
@@ -121,20 +134,24 @@ class Check_game_over:
                     new_field=self.game.board[field][0],
                     piece=interceptor,
                     old_occupant=None,
-                    game=self.game
+                    game=self.game,
                 )
-                if mv.isthisallowed(no_casualties = True) and mv.noroadblocks():
+                if mv.isthisallowed(no_casualties=True) and mv.noroadblocks():
                     self.game.update(
                         interceptor,
                         self.game.board[field][0][0],
                         self.game.board[field][0][1],
                         intercept=True,
                     )
-                    at = Attacked_fields(self.game.board_intercept, self.game.board_code)
+                    at = Attacked_fields(
+                        self.game.board_intercept, self.game.board_code
+                    )
                     self.game.board_check = at.get_dict_of_fields()
                     # put interceptor back where he was so that his field does not change for loop
                     self.game.update(
-                        interceptor, self.game.board[origin][0][0], self.game.board[origin][0][1]
+                        interceptor,
+                        self.game.board[origin][0][0],
+                        self.game.board[origin][0][1],
                     )
                     if not self.king_in_check():
                         return True
@@ -153,10 +170,16 @@ class Check_game_over:
         self.king = self.game.find_king(color)
         check = False
 
-        if self.king.color == 'black' and self.game.board_check[self.king.field] in [-1, 1]:
+        if self.king.color == 'black' and self.game.board_check[self.king.field] in [
+            -1,
+            1,
+        ]:
             check = True
 
-        if self.king.color == 'white' and self.game.board_check[self.king.field] in [1, 2]:
+        if self.king.color == 'white' and self.game.board_check[self.king.field] in [
+            1,
+            2,
+        ]:
             check = True
 
         if check:
