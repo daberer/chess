@@ -93,7 +93,7 @@ class Check_game_over:
                     game=self.game
                 )
                 # look if we can take down piece
-                if mv.isthisallowed() and mv.noroadblocks():
+                if mv.isthisallowed(no_casualties = True) and mv.noroadblocks():
                     self.game.update(
                         interceptor,
                         self.game.board[interceptor.field][0][0],
@@ -123,7 +123,7 @@ class Check_game_over:
                     old_occupant=None,
                     game=self.game
                 )
-                if mv.isthisallowed() and mv.noroadblocks():
+                if mv.isthisallowed(no_casualties = True) and mv.noroadblocks():
                     self.game.update(
                         interceptor,
                         self.game.board[field][0][0],

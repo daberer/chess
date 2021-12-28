@@ -6,10 +6,13 @@ from chess_pieces import Player
 
 pygame.init()
 
+#COLORS
 GREEN = (20, 255, 140)
 LIGHT = (242, 218, 182)
 DARK = (181, 135, 99)
-
+LIGHT_GREEN = (204,208,129)
+DARK_GREEN = (171,160,81)
+RED = (157, 61, 70)
 
 SCREENWIDTH = 800
 SCREENHEIGHT = 800
@@ -176,10 +179,11 @@ def execute_move(white_move, computer_move=False):
 
 
         old_occupant = game.board[game.board_code[game.active_piece.rect.x, game.active_piece.rect.y]][1]
-
+        origin = game.board[piece.field][0]
+        new_field = (game.active_piece.rect.x, game.active_piece.rect.y)
         mv = Move(
-            old_field=game.board[piece.field][0],
-            new_field=(game.active_piece.rect.x, game.active_piece.rect.y),
+            old_field= origin,
+            new_field= new_field,
             piece=piece,
             old_occupant=old_occupant,
             game=game
@@ -187,7 +191,7 @@ def execute_move(white_move, computer_move=False):
         ret = game.legal(mv, piece, game.active_piece.rect.x, game.active_piece.rect.y, old_occupant)
         game.recreate_checkdict()
         go = Check_game_over(piece.color, game)
-        return ret, go.checkmate()
+        return ret, go.checkmate(), origin, new_field
 
 
 def end_game():
@@ -203,16 +207,37 @@ def end_game():
     time.sleep(5)
     pygame.quit()
 
+def draw_field(color, x, y):
+    pygame.draw.rect(screen, color, pygame.Rect(x, y, 100, 100))
 
-def draw_board():
+def draw_board(origin_field=None, destination_field=None, check=None):
+    king_field = (-99, -99)
+    if check:
+        color = 'black'
+        if game.turn:
+            color = 'white'
+        king_field = game.board[game.find_king(color).field][0]
+
     for i, field in enumerate(fields):
-        if (i + int(i / 8)) % 2 == 0:
-            pygame.draw.rect(screen, DARK, pygame.Rect(field[0], field[1], 100, 100))
+        if field == king_field:
+           draw_field(RED, field[0], field[1])
+        elif (field == origin_field) or (field == destination_field):
+            col = LIGHT_GREEN
+            if (i + int(i / 8)) % 2 == 0:
+                col = DARK_GREEN
+            draw_field(col, field[0], field[1])
         else:
-            pygame.draw.rect(screen, LIGHT, pygame.Rect(field[0], field[1], 100, 100))
+            col = LIGHT
+            if (i + int(i / 8)) % 2 == 0:
+                col = DARK
+            draw_field(col, field[0], field[1])
 
 
 game.recreate_checkdict()
+correct_move = False
+origin = (0,0)
+new_field = (0,0)
+
 
 while carryOn:
     for event in pygame.event.get():
@@ -234,7 +259,7 @@ while carryOn:
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if len(pl.carry_pieces_list) > 0: # False if just clicking into an empty field
-                correct_move, check_status = execute_move(game.turn, computer_move=False)
+                correct_move, check_status, origin, new_field = execute_move(game.turn, computer_move=False)
                 game_over, check_given = check_status
                 if correct_move:
                     game.next_move()
@@ -253,17 +278,10 @@ while carryOn:
                         game.go_home(blocks_hit_list[0])
 
 
-
-
-        # if move_count % 2!= 0:
-        #     import time
-        #     time.sleep(0.1)
-        #     correct_move = execute_move(move_count, computer_move=True)
-        #     if correct_move:
-        #         move_count += 1
-        #         game_over = check_game_over()
-
-        draw_board()
+        if correct_move:
+            draw_board(origin_field=origin, destination_field=new_field, check=game.check_given)
+        else:
+            draw_board()
 
         Sprites.all_sprites_list.update()
 

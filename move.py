@@ -30,11 +30,11 @@ class Move:
                 return False
         return True
 
-    def isthisallowed(self):
+    def isthisallowed(self, no_casualties=False):
         if self.old_field == self.new_field:
             return False
         if self.piece.name() == 'Pawn':
-            return self.pawn()
+            return self.pawn(no_casualties)
         if self.piece.name() == 'Knight':
             return self.knight()
         if self.piece.name() == 'Bishop':
@@ -46,7 +46,7 @@ class Move:
         if self.piece.name() == 'King':
             return self.king()
 
-    def pawn(self):
+    def pawn(self, no_casualties):
         if not self.old_occupant:
             # move one or two fields with pawn
             self.move = [(0, 100)]
@@ -76,8 +76,9 @@ class Move:
                 if round(math.hypot(en_pawn_diff[0], en_pawn_diff[1]), 2) == 100:
                     if (self.piece.color == 'white' and self.diff[1] < 0 or self.piece.color == 'black' and self.diff[1] > 0) \
                             and self.old_field[1] == en_pawn_field[1]: # pos1 represents movement in x-axis
-                        en_pawn.kill()
-                        self.game.board[en_pawn.field][1] = None
+                        if not no_casualties:
+                            en_pawn.kill()
+                            self.game.board[en_pawn.field][1] = None
                         return True
             if self.piece.color == 'white' and self.diff[1] < 0 and self.old_occupant:
                 return True
