@@ -21,17 +21,21 @@ class Game:
         self.board_code = ob
         self.board_check = None
         self.board_intercept = None
-        self.fen = fen
+        self.fen = Fen()
         self.check_given = False
         self.white_gameover = False
         self.black_gameover = False
         self.white_castle = False
         self.black_castle = False
         self.active_piece = None
+        self.current_fen = None
 
     def next_move(self):
         self.move_count += 1
         self.turn = not self.turn
+        raw_fen = self.fen.get_fen_from_board(self.board)
+        self.current_fen = self.fen.shrink_fen(raw_fen)
+
 
     def recreate_checkdict(self):
         at = Attacked_fields(self.board, self.board_code)
@@ -82,9 +86,9 @@ class Game:
         self.board_intercept = intercept_bo
 
     def fill_board(self):
-        stat = Fen()
+
         for i, field in enumerate(self.board):
-            co, ty = stat.fen_code(stat.start_fen[i])
+            co, ty = self.fen.fen_code(self.fen.start_fen[i])
             if ty is not None:
                 piece = self.set_up_piece(co, self.board[field][0], ty, field)
                 self.board[field][1] = piece
@@ -289,35 +293,28 @@ class Fen:
         self.start_fen = self.extend_fen(start_fen)
 
     # translate field into x,y
-    def fen_code(self, sign):
+    def fen_code(self, sign, color=None):
         """
-        translates Forsyth-Edward-Notation into the corresponding chess piece
-        :param sign: str of fen code
+        translates Forsyth-Edward-Notation into the corresponding chess piece and vice versa
+        :param sign: str of fen code, or piece class
         :return: color and type of piece
         """
-        assert type(sign) == str
-        if sign.isupper():
-            col = 'white'
+        fendict = {'p': Pawn, 'n': Knight, 'b': Bishop, 'r':  Rook, 'q': Queen,  'k': King, 'o': None}
+        key_list = list(fendict.keys())
+        val_list = list(fendict.values())
+        col = None
+        if type(sign) == str:
+            if sign.isupper():
+                col = 'white'
+            else:
+                col = 'black'
+            sign = sign.lower()
+            ret = fendict[sign]
         else:
-            col = 'black'
-        sign = sign.lower()
-        if sign == 'p':
-            ret = Pawn
-        elif sign == 'n':
-            ret = Knight
-        elif sign == 'b':
-            ret = Bishop
-        elif sign == 'r':
-            ret = Rook
-        elif sign == 'q':
-            ret = Queen
-        elif sign == 'k':
-            ret = King
-        elif sign == 'o':
-            ret = None
-        else:
-            raise Exception(f'{sign} is not a valid sign:')
-
+            position = val_list.index(sign)
+            ret = key_list[position]
+            if color:
+                col = color
         return col, ret
 
     def fen_insert(self, st, length, ind):
@@ -353,3 +350,27 @@ class Fen:
                 ind = match.start()
                 ext_fen = self.fen_insert(ext_fen, int(ext_fen[ind]), ind)
         return ext_fen
+
+    def shrink_fen(self, fen):
+        """replace consecutive 'o' signs with the length of this pattern. rnoook becomes rn3k."""
+        occurs = re.findall(r'(([o])\2+)', fen)
+        for oc in occurs:
+            match = re.search(f"{oc[0]}", fen)
+            num = str(len(match.re.pattern))
+            fen = fen[:match.start()] + num + fen[match.end():]
+        # TODO: find neater solution for single 'o's
+        while 'o' in fen:
+            match = re.search('o', fen)
+            fen = fen[:match.start()] + '1' + fen[match.end():]
+        return fen
+
+    def get_fen_from_board(self, board):
+        fen_string = ''
+        for item in board.items():
+            if item[1][1]:
+                _, add = self.fen_code(item[1][1].__class__, item[1][1].color)
+                fen_string += add
+            else:
+                fen_string += 'o'
+
+        return '/'.join(fen_string[i:i+8] for i in range(0, len(fen_string), 8))
