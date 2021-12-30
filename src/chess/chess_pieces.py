@@ -1,7 +1,10 @@
-import pygame
+import pdb
 
+import pygame
+from chess.utils import get_project_root
 
 WHITE = (255, 255, 255)
+
 
 
 class Piece(pygame.sprite.Sprite):
@@ -26,9 +29,9 @@ class Pawn(Piece):
         super().__init__(color, field)
 
         if self.color == 'black':
-            self.image = pygame.image.load("pieces/black_pawn.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/black_pawn.png").convert_alpha()
         else:
-            self.image = pygame.image.load("pieces/white_pawn.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/white_pawn.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 100))
 
         # Fetch the rectangle object that has the dimensions of the image.
@@ -42,9 +45,9 @@ class Knight(Piece):
         super().__init__(color, field)
 
         if self.color == 'black':
-            self.image = pygame.image.load("pieces/black_knight.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/black_knight.png").convert_alpha()
         else:
-            self.image = pygame.image.load("pieces/white_knight.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/white_knight.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 100))
 
         # Fetch the rectangle object that has the dimensions of the image.
@@ -57,9 +60,9 @@ class Bishop(Piece):
         super().__init__(color, field)
 
         if self.color == 'black':
-            self.image = pygame.image.load("pieces/black_bishop.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/black_bishop.png").convert_alpha()
         else:
-            self.image = pygame.image.load("pieces/white_bishop.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/white_bishop.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 100))
 
         # Fetch the rectangle object that has the dimensions of the image.
@@ -71,9 +74,9 @@ class Rook(Piece):
         # Call the parent class (Sprite) constructor
         super().__init__(color, field)
         if self.color == 'black':
-            self.image = pygame.image.load("pieces/black_rook.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/black_rook.png").convert_alpha()
         else:
-            self.image = pygame.image.load("pieces/white_rook.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/white_rook.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 100))
 
         # Fetch the rectangle object that has the dimensions of the image.
@@ -87,9 +90,9 @@ class Queen(Piece):
         super().__init__(color, field)
 
         if self.color == 'black':
-            self.image = pygame.image.load("pieces/black_queen.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/black_queen.png").convert_alpha()
         else:
-            self.image = pygame.image.load("pieces/white_queen.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/white_queen.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 100))
 
         # Fetch the rectangle object that has the dimensions of the image.
@@ -102,9 +105,9 @@ class King(Piece):
         super().__init__(color, field)
 
         if self.color == 'black':
-            self.image = pygame.image.load("pieces/black_king.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/black_king.png").convert_alpha()
         else:
-            self.image = pygame.image.load("pieces/white_king.png").convert_alpha()
+            self.image = pygame.image.load(get_project_root().as_posix() + "/pieces/white_king.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 100))
 
         # Fetch the rectangle object that has the dimensions of the image.

@@ -1,5 +1,5 @@
-from move import Move
-from check import Attacked_fields
+from chess.move import Move
+from chess.check import Attacked_fields
 
 
 class Check_game_over:

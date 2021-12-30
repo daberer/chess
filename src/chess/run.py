@@ -1,8 +1,8 @@
 import pygame, random
-from move import Move
-from procedure import Game, Sprites
-from game_over import Check_game_over
-from chess_pieces import Player
+from chess.move import Move
+from chess.procedure import Game, Sprites
+from chess.game_over import Check_game_over
+from chess.chess_pieces import Player
 
 pygame.init()
 
@@ -222,7 +222,11 @@ def draw_board(origin_field=None, destination_field=None, check=None):
         color = 'black'
         if game.turn:
             color = 'white'
-        king_field = game.board[game.find_king(color).field][0]
+        try:
+            king_field = game.board[game.find_king(color).field][0]
+        except AttributeError as e:
+            # king is dead
+            pass
 
     for i, field in enumerate(fields):
         if field == king_field:
@@ -307,6 +311,6 @@ while carryOn:
             end_game()
 
         # Number of frames per secong e.g. 60
-        clock.tick(200)
+        clock.tick(300)
 
 pygame.quit()

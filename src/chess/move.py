@@ -1,5 +1,5 @@
 import math
-from procedure import Sprites
+from chess.procedure import Sprites
 
 
 class Move:

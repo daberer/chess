@@ -1,5 +1,5 @@
-from check import Attacked_fields
-from chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King
+from chess.check import Attacked_fields
+from chess.chess_pieces import Pawn, Knight, Bishop, Rook, Queen, King
 import re
 
 
@@ -85,10 +85,12 @@ class Game:
         self.board_check = check
         self.board_intercept = intercept_bo
 
-    def fill_board(self):
-
+    def fill_board(self, custom_pos=None):
+        pos = self.fen.start_fen
+        if custom_pos:
+            pos = custom_pos
         for i, field in enumerate(self.board):
-            co, ty = self.fen.fen_code(self.fen.start_fen[i])
+            co, ty = self.fen.fen_code(pos[i])
             if ty is not None:
                 piece = self.set_up_piece(co, self.board[field][0], ty, field)
                 self.board[field][1] = piece
@@ -262,7 +264,9 @@ class Game:
         if intercept:
             self.board_intercept = {key: value for key, value in self.board.items()}
             self.board_intercept[self.board_code[piecex, piecey]][1] = piece
-            self.board_intercept[piece.field][1] = None
+            # TODO: Bug - influences self.board
+            if not piece.name() == 'King':
+                self.board_intercept[piece.field][1] = None
             piece.field = self.board_code[piecex, piecey]
             if queen_created:
                 return piece
