@@ -29,12 +29,16 @@ class Game:
         self.black_castle = False
         self.active_piece = None
         self.current_fen = None
+        self.moves = {}
 
     def next_move(self):
         self.move_count += 1
         self.turn = not self.turn
-        raw_fen = self.fen.get_fen_from_board(self.board)
-        self.current_fen = self.fen.shrink_fen(raw_fen)
+        # for now use unformatted fen
+        #raw_fen = self.fen.get_fen_from_board(self.board)
+        #self.current_fen = self.fen.shrink_fen(raw_fen)
+        self.current_fen = self.fen.get_fen_from_board(self.board)
+        self.moves[self.move_count] = self.current_fen
 
 
     def recreate_checkdict(self):
@@ -85,10 +89,12 @@ class Game:
         self.board_check = check
         self.board_intercept = intercept_bo
 
-    def fill_board(self):
-
+    def fill_board(self, custom_pos=None):
+        pos = self.fen.start_fen
+        if custom_pos:
+            pos = custom_pos
         for i, field in enumerate(self.board):
-            co, ty = self.fen.fen_code(self.fen.start_fen[i])
+            co, ty = self.fen.fen_code(pos[i])
             if ty is not None:
                 piece = self.set_up_piece(co, self.board[field][0], ty, field)
                 self.board[field][1] = piece
@@ -262,6 +268,7 @@ class Game:
         if intercept:
             self.board_intercept = {key: value for key, value in self.board.items()}
             self.board_intercept[self.board_code[piecex, piecey]][1] = piece
+            # TODO: Bug - influences self.board
             self.board_intercept[piece.field][1] = None
             piece.field = self.board_code[piecex, piecey]
             if queen_created:
@@ -315,6 +322,8 @@ class Fen:
             ret = key_list[position]
             if color:
                 col = color
+                if col == 'white':
+                    ret = ret.upper()
         return col, ret
 
     def fen_insert(self, st, length, ind):
@@ -353,6 +362,7 @@ class Fen:
 
     def shrink_fen(self, fen):
         """replace consecutive 'o' signs with the length of this pattern. rnoook becomes rn3k."""
+        fen = '/'.join(fen[i:i+8] for i in range(0, len(fen), 8))
         occurs = re.findall(r'(([o])\2+)', fen)
         for oc in occurs:
             match = re.search(f"{oc[0]}", fen)
@@ -373,4 +383,5 @@ class Fen:
             else:
                 fen_string += 'o'
 
-        return '/'.join(fen_string[i:i+8] for i in range(0, len(fen_string), 8))
+        return fen_string
+

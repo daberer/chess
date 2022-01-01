@@ -77,7 +77,7 @@ class Check_game_over:
         interceptors = [
             self.game.board[b][1]
             for b in self.game.board
-            if self.game.board[b][1] != None and self.game.board[b][1].color == col
+            if self.game.board[b][1] != None and self.game.board[b][1].color == col and self.game.board[b][1].name() != 'King'
         ]
         enemies = [
             self.game.board[b][1]
@@ -89,7 +89,7 @@ class Check_game_over:
         ]
         for interceptor in interceptors:
             origin = interceptor.field
-            # check if someone on my team an kill someone of theirs to save the king
+            # check if someone on my team can kill someone of theirs to save the king
             for enemy in enemies:
                 go_back_to_bo()
                 mv = Move(

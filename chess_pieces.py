@@ -124,7 +124,7 @@ class Player(pygame.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         super().__init__()
         self.image = pygame.Surface([15, 15])
-        self.image.set_alpha(128)
+        self.image.set_alpha(0)
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.carry_pieces_list = []

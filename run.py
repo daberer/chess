@@ -7,7 +7,7 @@ from chess_pieces import Player
 pygame.init()
 
 # COLORS
-GREEN = (20, 255, 140)
+BLACK = (0, 0, 0)
 LIGHT = (242, 218, 182)
 DARK = (181, 135, 99)
 LIGHT_GREEN = (204, 208, 129)
@@ -39,7 +39,7 @@ Sprites.all_sprites_list.add(pl)
 
 
 # Drawing on Screen
-screen.fill(GREEN)
+screen.fill(BLACK)
 
 
 # board = pygame.sprite.Group()
@@ -263,6 +263,7 @@ while carryOn:
             else:
                 pl.carry_pieces_list = blocks_hit_list
 
+
         elif event.type == pygame.MOUSEBUTTONUP:
             if (
                 len(pl.carry_pieces_list) > 0
@@ -295,6 +296,8 @@ while carryOn:
             )
         else:
             draw_board()
+        # fills the screen with a color
+        #screen.fill((60,25,60))
 
         Sprites.all_sprites_list.update()
 
