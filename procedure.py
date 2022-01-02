@@ -14,9 +14,9 @@ class Game:
     Creates a game object to have a game structure
     """
 
-    def __init__(self, turn=True, board=None, fen=None, ob=None):
-        self.turn = True
-        self.move_count = 0
+    def __init__(self, turn=True, board=None, fen=None, ob=None, move_count=0, moves={}):
+        self.turn = turn
+        self.move_count = move_count
         self.board = board
         self.board_code = ob
         self.board_check = None
@@ -29,7 +29,7 @@ class Game:
         self.black_castle = False
         self.active_piece = None
         self.current_fen = None
-        self.moves = {}
+        self.moves = moves
 
     def next_move(self):
         self.move_count += 1
@@ -384,4 +384,6 @@ class Fen:
                 fen_string += 'o'
 
         return fen_string
+
+
 
