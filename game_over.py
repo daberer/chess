@@ -85,8 +85,8 @@ class Check_game_over:
             for enemy in enemies:
                 go_back_to_bo()
                 mv = Move(
-                    old_field=self.game.board[interceptor.field][0],
-                    new_field=self.game.board[enemy.field][0],
+                    old_field=interceptor.field,
+                    new_field=enemy.field,
                     piece=interceptor,
                     old_occupant=enemy,
                     game=self.game,
@@ -122,8 +122,8 @@ class Check_game_over:
             for field in empty_fields:
                 go_back_to_bo()
                 mv = Move(
-                    old_field=self.game.board[interceptor.field][0],
-                    new_field=self.game.board[field][0],
+                    old_field=interceptor.field,
+                    new_field=field,
                     piece=interceptor,
                     old_occupant=None,
                     game=self.game,
