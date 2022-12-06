@@ -198,9 +198,9 @@ class Attacked_fields:
                 self.bo[n][1].name() == 'King'
                 and self.piece.color != self.bo[n][1].color
             ):
-                upright.append(n)
+                downleft.append(n)
             else:
-                upright.append(n)
+                downleft.append(n)
                 break
         return upleft + upright + downleft + downright
 
