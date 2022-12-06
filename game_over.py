@@ -12,21 +12,13 @@ class Check_game_over:
         Returns True if the king can flee.
         :return:
         """
-        ch, nu = ord(self.king.field[0]), int(self.king.field[-1])
-        hor = [
-            chr(j) + str(nu)
-            for j in [i + ch for i in range(-1, 2, 2)]
-            if j > 64 and j < 73
-        ]
-        ver = [
-            chr(ch) + str(j)
-            for j in [i + nu for i in range(-1, 2, 2)]
-            if j < 9 and j > 0
-        ]
+        x, y = self.king.field[0], self.king.field[1]
+        hor = [(j, y) for j in [i + x for i in range(-1, 2, 2)] if j > 0 and j < 9]
+        ver = [(x, j) for j in [i + y for i in range(-1, 2, 2)] if j < 9 and j > 0]
         diag = []
-        for num in ver:
-            for let in hor:
-                diag.append(let[0] + (num[1]))
+        for y1 in ver:
+            for x1 in hor:
+                diag.append((x1[0], y1[1]))
         fields = hor + ver + diag
 
         for field in fields:

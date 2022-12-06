@@ -86,7 +86,7 @@ class Attacked_fields:
         y -= 1
         if self.piece.color == 'white':
             y += 2
-        return [(y, k) for k in [j for j in [i + x for i in range(-1, 2, 2)] if j > 0 and j < 9] if y > 0 and y < 9]
+        return [(k, y) for k in [j for j in [i + x for i in range(-1, 2, 2)] if j > 0 and j < 9] if y > 0 and y < 9]
 
     def rook_find_attacked_fields(self):
         """
@@ -95,35 +95,34 @@ class Attacked_fields:
         """
         x, y = self.piece.field[0], self.piece.field[-1]
         left, right, up, down = [], [], [], []
-        for k in [j for j in [i + x for i in range(1, 8)] if j > 1 and j < 9 ]:
+        for k in [(j,y) for j in [i + x for i in range(1, 8)] if j > 1 and j < 9]:
             # king exception because an attack-range is not stopped by a king - otherwise he could retreat along the same line
-            if self.bo[(y,k)][1] == None or (self.bo[(y,k)][1].name() == 'King' and self.piece.color != self.bo[(y,k)][1].color):
-                right.append((y, k))
+            if self.bo[k][1] == None or (self.bo[k][1].name() == 'King' and self.piece.color != self.bo[k][1].color):
+                right.append(k)
             else:
-                right.append((y, k))
+                right.append(k)
                 break
-        for l in [j for j in [i for i in range(x, 1, -1)] if j > 0 and j < 8]:
-            if self.bo[(y,l)][1] == None or (
-                self.bo[(y,l)][1].name() == 'King'
-                and self.piece.color != self.bo[(y,l)][1].color
+        for l in [(j,y) for j in [i for i in range(x, 1, -1)] if j > 0 and j < 8]:
+            if self.bo[l][1] == None or (
+                self.bo[l][1].name() == 'King'
+                and self.piece.color != self.bo[l][1].color
             ):
-                left.append((y, l))
+                left.append(l)
             else:
-                left.append((y, l))
+                left.append(l)
                 break
-        for m in [j for j in [y - i for i in range(1, 9)] if j > 0 and j < 8]:
-            if self.bo[(m,x)][1] == None or (self.bo[(m,x)][1].name() == 'King' and self.piece.color !=
-                                             self.bo[(m,x)][1].color):
-                down.append((m,x))
+        for m in [(x,j) for j in [y - i for i in range(1, 9)] if j > 0 and j < 8]:
+            if self.bo[m][1] == None or (self.bo[m][1].name() == 'King' and self.piece.color !=
+                                             self.bo[m][1].color):
+                down.append(m)
             else:
-                down.append((m,x))
+                down.append(m)
                 break
-        for n in [j for j in [i + 1 for i in range(y, 8)] if j > 1 and j < 9]:
-            if self.bo[(n,x)][1] == None or (self.bo[(n,x)][1].name() == 'King'
-                and self.piece.color != self.bo[n][(n,x)].color):
-                up.append((n,x))
+        for n in [(x,j) for j in [i + 1 for i in range(y, 8)] if j > 1 and j < 9]:
+            if self.bo[n][1] == None or (self.bo[n][1].name() == 'King' and self.piece.color != self.bo[n].color):
+                up.append(n)
             else:
-                up.append((n,x))
+                up.append(n)
                 break
         return left + right + up + down
 
@@ -134,7 +133,7 @@ class Attacked_fields:
         """
         x, y = self.piece.field[0], self.piece.field[1]
         upleft, upright, downleft, downright = [], [], [], []
-        for k in [(j, x + i + 1) for i,j in enumerate(range(y + 1, 9)) if x + i +1 < 9]:
+        for k in [(x + i + 1, j) for i,j in enumerate(range(y + 1, 9)) if x + i +1 < 9]:
             if self.bo[k][1] == None or (
                 self.bo[k][1].name() == 'King'
                 and self.piece.color != self.bo[k][1].color
@@ -143,7 +142,7 @@ class Attacked_fields:
             else:
                 upright.append(k)
                 break
-        for l in [(j, x - i - 1) for i,j in enumerate(range(y + 1, 9)) if x -i -1 > 0]:
+        for l in [(x - i - 1, j) for i,j in enumerate(range(y + 1, 9)) if x -i -1 > 0]:
             if self.bo[l][1] == None or (
                 self.bo[l][1].name() == 'King'
                 and self.piece.color != self.bo[l][1].color
@@ -152,7 +151,7 @@ class Attacked_fields:
             else:
                 upleft.append(l)
                 break
-        for m in [(j - 1, x + i + 1) for i, j in enumerate(range(y, 1, -1)) if (i + x + 1) < 9]:
+        for m in [(x + i + 1, j - 1) for i, j in enumerate(range(y, 1, -1)) if (i + x + 1) < 9]:
             if self.bo[m][1] == None or (
                 self.bo[m][1].name() == 'King'
                 and self.piece.color != self.bo[m][1].color
@@ -161,7 +160,7 @@ class Attacked_fields:
             else:
                 downright.append(m)
                 break
-        for n in [(j - 1, x - i - 1) for i, j in enumerate(range(y, 1, -1)) if x - i - 1 > 0]:
+        for n in [(x - i - 1, j - 1) for i, j in enumerate(range(y, 1, -1)) if x - i - 1 > 0]:
             if self.bo[n][1] == None or (
                 self.bo[n][1].name() == 'King'
                 and self.piece.color != self.bo[n][1].color
@@ -174,28 +173,28 @@ class Attacked_fields:
 
     def knight_find_attacked_fields(self):
         x, y = self.piece.field[0], self.piece.field[1]
-        hor = []
+        ver = []
         for m in [j for j in [i + y for i in range(-2, 3, 4)] if j > 0 and j < 9]:
             if (x - 1) > 0:
-                hor.append((m, (x - 1)))
+                ver.append((m, (x - 1)))
             if (x + 1) < 9:
-                hor.append((m, (x + 1)))
-        ver = []
+                ver.append((m, (x + 1)))
+        hor = []
         for m in [j for j in [i + y for i in range(-1, 2, 2)] if j > 0 and j < 9]:
             if (x - 2) > 0:
-                ver.append((m, (x - 2)))
+                hor.append((m, (x - 2)))
             if (x + 2) < 9:
-                ver.append((m, (x + 2)))
-        return hor + ver
+                hor.append((m, (x + 2)))
+        return ver + hor
 
     def king_find_attacked_fields(self):
         x, y = self.piece.field[0], self.piece.field[1]
-        hor = [(y, j) for j in [i + x for i in range(-1, 2, 2)]if j > 0 and j < 9]
-        ver = [(j, x) for j in [i + y for i in range(-1, 2, 2)]
+        hor = [(j, y) for j in [i + x for i in range(-1, 2, 2)]if j > 0 and j < 9]
+        ver = [(x, j) for j in [i + y for i in range(-1, 2, 2)]
             if j < 9 and j > 0
         ]
         diag = []
         for v in ver:
             for h in hor:
-                diag.append((v[0], h[1]))
+                diag.append((h[0], v[1]))
         return hor + ver + diag

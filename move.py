@@ -9,7 +9,7 @@ class Move:
         self.piece = piece
         self.move = None
         self.diff = tuple(map(lambda i, j: i - j, self.new_field, self.old_field))
-        self.dist = round(math.hypot(self.diff[0], self.diff[1]), 2)
+        self.dist = round(math.hypot(self.diff[0], self.diff[1]), 4)
         self.old_occupant = old_occupant
         self.game = game
 
@@ -19,15 +19,17 @@ class Move:
         # diagonal = True
         # if round(self.dist % 100, 2) == 0:
         #     diagonal = False
-        ontheway = self.get_fields_on_the_way(
-            self.game.board_code[self.old_field], self.game.board_code[self.new_field]
-        )
+        ontheway = self.get_fields_on_the_way(self.old_field, self.new_field)
         for block in ontheway:
             if self.game.board[block][1] != None:
                 return False
         return True
 
     def isthisallowed(self, no_casualties=False):
+        """
+        :param no_casualties: for hypothetical moves
+        :return:
+        """
         if self.old_field == self.new_field:
             return False
         if self.piece.name() == 'Pawn':
@@ -46,26 +48,24 @@ class Move:
     def pawn(self, no_casualties):
         if not self.old_occupant:
             # move one or two fields with pawn
-            self.move = [(0, 100)]
+            self.move = [(0, 1)]
             if (
-                self.old_field[1] == 100
+                self.old_field[1] == 7
                 and self.piece.color == 'black'
-                or self.old_field[1] == 600
+                or self.old_field[1] == 2
                 and self.piece.color == 'white'
             ):
-                self.move = [self.move[0], (0, 200)]
-            if self.piece.color == 'white':
-                self.move = [
-                    tuple([-1 * i for i in j]) for j in self.move
-                ]  # change sign
+                self.move = [self.move[0], (0, 2)]
+            if self.piece.color == 'black':
+                self.move = [tuple([-1 * i for i in j]) for j in self.move]  # change sign
             for mo in self.move:
                 if self.add_two_tuples(self.old_field, mo) == self.new_field:
-                    if self.dist == 200:
+                    if self.dist == 2:
                         self.piece.enpassant = True
                     return True
 
         # move pawn diagonally
-        if self.dist == 141.42:
+        if self.dist == 1.4142:
             # enpassant
             en_pawn_field, en_pawn = self.find_enpassanting_pawn()
             if en_pawn_field is not None:
@@ -94,7 +94,7 @@ class Move:
 
     def knight(self):
         # knight always hops the same distance..
-        if self.dist == 223.61:
+        if self.dist == 2.2361:
             return True
         return False
 
@@ -226,26 +226,26 @@ class Move:
         :param end: str, field where piece wants to move to
         :return: list, fields between start and end field
         """
-        ch1 = start[0]
-        ch2 = end[0]
-        nu1 = start[1]
-        nu2 = end[1]
-        if ord(ch1) > ord(ch2):
-            let = [chr(i) for i in list(range(ord(ch1), ord(ch2), -1))[1:]]
+        y1 = start[1]
+        y2 = end[1]
+        x1 = start[0]
+        x2 = end[0]
+        if y1 > y2:
+            ver = [i for i in list(range(y1, y2, -1))[1:]]
         else:
-            let = [chr(i) for i in list(range(ord(ch1), ord(ch2)))[1:]]
-        if int(nu1) > int(nu2):
-            num = [str(x) for x in list(range(int(nu1), int(nu2), -1))[1:]]
+            ver = [i for i in list(range(y1, y2))[1:]]
+        if x1 > x2:
+            hor = [x for x in list(range(x1, x2, -1))[1:]]
         else:
-            num = [str(x) for x in list(range(int(nu1), int(nu2)))[1:]]
+            hor = [x for x in list(range(x1, x2))[1:]]
 
         # if movement is rook-move
-        if len(let) == 0 and len(num) > 0:
-            ret = [ch1 + num[i] for i in range(len(num))]
-        elif len(let) > 0 and len(num) == 0:
-            ret = [let[i] + nu1 for i in range(len(let))]
+        if len(ver) == 0 and len(hor) > 0:
+            ret = [(hor[i], y1) for i in range(len(hor))]
+        elif len(ver) > 0 and len(hor) == 0:
+            ret = [(x1, ver[i]) for i in range(len(ver))]
         else:
-            ret = [let[i] + num[i] for i in range(len(num))]
+            ret = [(hor[i], ver[i]) for i in range(len(hor))]
 
         return ret
 
