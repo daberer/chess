@@ -47,10 +47,6 @@ def main(start_fen = None, move_count = 0, moves_dict ={0 : 'rnbqkbnrppppppppooo
     # Drawing on Screen
     screen.fill(BLACK)
 
-
-
-
-
     # board = pygame.sprite.Group()
     fields = [(i * 100, j * 100) for j in range(8) for i in range(8)]
 
