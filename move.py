@@ -85,9 +85,9 @@ class Move:
                             en_pawn.kill()
                             self.game.board[en_pawn.field][1] = None
                         return True
-            if self.piece.color == 'white' and self.diff[1] < 0 and self.old_occupant:
+            if self.piece.color == 'white' and self.diff[1] > 0 and self.old_occupant:
                 return True
-            if self.piece.color == 'black' and self.diff[1] > 0 and self.old_occupant:
+            if self.piece.color == 'black' and self.diff[1] < 0 and self.old_occupant:
                 return True
 
         return False
