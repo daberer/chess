@@ -60,7 +60,7 @@ class Game:
         self.active_piece.rect.y = self.board[self.active_piece.field][0][1]
         return False
 
-    def loc(self, up, side):
+    def loc(self, side, up):
         """
         translates string containing name of field into coordinates
         :param up: int
@@ -69,34 +69,37 @@ class Game:
         x and y coordinates each ranging from 0 - 700 in steps of 100.
         H1 is 0,0, A8 is 700,700
         """
-        return (up * 100 - 100, side * 100 - 100)
+        return (side * 100 - 100, 800 - up * 100, )
 
     def create_boards(self):
         bo = {}
         ob = {}
         check = {}
         intercept_bo = {}
-        for y in range(1, 9):
-            for x in range(1, 9):
-                bo[(y,x)] = [(self.loc(y, x)), None]
-                check[(y,x)] = 0
-                ob[(self.loc(y, x))] = (y,x)
-                intercept_bo[(y, x)] = None
+        for x in range(1, 9):
+            for y in range(1, 9):
+                bo[(x,y)] = [(self.loc(x, y)), None]
+                check[(x,y)] = 0
+                ob[(self.loc(x, y))] = (x,y)
+                intercept_bo[(x, y)] = None
         self.board = bo
         self.board_code = ob
         self.board_check = check
         self.board_intercept = intercept_bo
 
     def fill_board(self, custom_pos=None):
+        i = 0
         pos = self.fen.start_fen
         if custom_pos:
             pos = custom_pos
-        for i, field in enumerate(self.board):
-            co, ty = self.fen.fen_code(pos[i])
-            if ty is not None:
-                piece = self.set_up_piece(co, self.board[field][0], ty, field)
-                self.board[field][1] = piece
-                Sprites.all_sprites_list.add(piece)
+        for y in range(8, 0, -1):
+            for x in range(1,9):
+                co, ty = self.fen.fen_code(pos[i])
+                i += 1
+                if ty is not None:
+                    piece = self.set_up_piece(co, self.board[(x,y)][0], ty, (x,y))
+                    self.board[(x,y)][1] = piece
+                    Sprites.all_sprites_list.add(piece)
 
     def legal(self, mv, piece, piecex, piecey, old_occupant):
         """

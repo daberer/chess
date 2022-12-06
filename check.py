@@ -9,10 +9,14 @@ class Attacked_fields:
         self.piece = None
 
     def create_dict(self):
+        """
+        in pygame first coordinate is x! (see pygame.event.get().pos)
+        :return:
+        """
         self.di = {}
         for x in range(1, 9):
-            for y in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
-                self.di[f"{y}{x}"] = 0
+            for y in range(1, 9):
+                self.di[(x,y)] = 0
 
     def clear_dict(self):
         self.di = dict.fromkeys(self.di, 0)
@@ -78,7 +82,7 @@ class Attacked_fields:
         return self.di
 
     def pawn_find_attacked_fields(self):
-        y, x = self.piece.field[0], self.piece.field[1]
+        x, y = self.piece.field[0], self.piece.field[1]
         y -= 1
         if self.piece.color == 'white':
             y += 2
@@ -89,7 +93,7 @@ class Attacked_fields:
         start at field of piece and iterate in each of the four directions until any piece is in the way.
         :return:
         """
-        y, x = self.piece.field[0], self.piece.field[-1]
+        x, y = self.piece.field[0], self.piece.field[-1]
         left, right, up, down = [], [], [], []
         for k in [j for j in [i + x for i in range(1, 8)] if j > 1 and j < 9 ]:
             # king exception because an attack-range is not stopped by a king - otherwise he could retreat along the same line
@@ -128,7 +132,7 @@ class Attacked_fields:
         start at field of piece and iterate in each of the four directions until any piece is in the way.
         :return:
         """
-        y, x = self.piece.field[0], self.piece.field[1]
+        x, y = self.piece.field[0], self.piece.field[1]
         upleft, upright, downleft, downright = [], [], [], []
         for k in [(j, x + i + 1) for i,j in enumerate(range(y + 1, 9)) if x + i +1 < 9]:
             if self.bo[k][1] == None or (
@@ -169,7 +173,7 @@ class Attacked_fields:
         return upleft + upright + downleft + downright
 
     def knight_find_attacked_fields(self):
-        y, x = self.piece.field[0], self.piece.field[1]
+        x, y = self.piece.field[0], self.piece.field[1]
         hor = []
         for m in [j for j in [i + y for i in range(-2, 3, 4)] if j > 0 and j < 9]:
             if (x - 1) > 0:
@@ -185,7 +189,7 @@ class Attacked_fields:
         return hor + ver
 
     def king_find_attacked_fields(self):
-        y, x = self.piece.field[0], self.piece.field[1]
+        x, y = self.piece.field[0], self.piece.field[1]
         hor = [(y, j) for j in [i + x for i in range(-1, 2, 2)]if j > 0 and j < 9]
         ver = [(j, x) for j in [i + y for i in range(-1, 2, 2)]
             if j < 9 and j > 0
