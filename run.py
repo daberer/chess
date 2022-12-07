@@ -47,10 +47,6 @@ def main(start_fen = None, move_count = 0, moves_dict ={0 : 'rnbqkbnrppppppppooo
     # Drawing on Screen
     screen.fill(BLACK)
 
-
-
-
-
     # board = pygame.sprite.Group()
     fields = [(i * 100, j * 100) for j in range(8) for i in range(8)]
 
@@ -206,8 +202,8 @@ def main(start_fen = None, move_count = 0, moves_dict ={0 : 'rnbqkbnrppppppppooo
             old_occupant = game.board[
                 game.board_code[game.active_piece.rect.x, game.active_piece.rect.y]
             ][1]
-            origin = game.board[piece.field][0]
-            new_field = (game.active_piece.rect.x, game.active_piece.rect.y)
+            origin = piece.field
+            new_field = game.board_code[game.active_piece.rect.x, game.active_piece.rect.y]
             mv = Move(
                 old_field=origin,
                 new_field=new_field,

@@ -60,45 +60,46 @@ class Game:
         self.active_piece.rect.y = self.board[self.active_piece.field][0][1]
         return False
 
-    def loc(self, str):
+    def loc(self, side, up):
         """
         translates string containing name of field into coordinates
-        :param str: string of length two, containing char and number ("A1")
+        :param up: int
+        :param side: int
         :return:
         x and y coordinates each ranging from 0 - 700 in steps of 100.
         H1 is 0,0, A8 is 700,700
         """
-        assert len(str) == 2
-        cha = list(str)[0]
-        num = list(str)[1]
-        return ((ord(cha) - 65)) * 100, 800 - int(num) * 100
+        return (side * 100 - 100, 800 - up * 100, )
 
     def create_boards(self):
         bo = {}
         ob = {}
         check = {}
         intercept_bo = {}
-        for x in range(8, 0, -1):
-            for y in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
-                bo[f"{y}{x}"] = [(self.loc(y + str(x))), None]
-                check[f"{y}{x}"] = 0
-                ob[(self.loc(y + str(x)))] = f"{y}{x}"
-                intercept_bo[f"{y}{x}"] = None
+        for x in range(1, 9):
+            for y in range(1, 9):
+                bo[(x,y)] = [(self.loc(x, y)), None]
+                check[(x,y)] = 0
+                ob[(self.loc(x, y))] = (x,y)
+                intercept_bo[(x, y)] = None
         self.board = bo
         self.board_code = ob
         self.board_check = check
         self.board_intercept = intercept_bo
 
     def fill_board(self, custom_pos=None):
+        i = 0
         pos = self.fen.start_fen
         if custom_pos:
             pos = custom_pos
-        for i, field in enumerate(self.board):
-            co, ty = self.fen.fen_code(pos[i])
-            if ty is not None:
-                piece = self.set_up_piece(co, self.board[field][0], ty, field)
-                self.board[field][1] = piece
-                Sprites.all_sprites_list.add(piece)
+        for y in range(8, 0, -1):
+            for x in range(1,9):
+                co, ty = self.fen.fen_code(pos[i])
+                i += 1
+                if ty is not None:
+                    piece = self.set_up_piece(co, self.board[(x,y)][0], ty, (x,y))
+                    self.board[(x,y)][1] = piece
+                    Sprites.all_sprites_list.add(piece)
 
     def legal(self, mv, piece, piecex, piecey, old_occupant):
         """
@@ -376,14 +377,17 @@ class Fen:
 
     def get_fen_from_board(self, board):
         fen_string = ''
-        for item in board.items():
-            if item[1][1]:
-                _, add = self.fen_code(item[1][1].__class__, item[1][1].color)
-                fen_string += add
-            else:
-                fen_string += 'o'
-
+        for y in range(8, 0, -1):
+            for x in range(1,9):
+                item = board[(x,y)][1]
+                if item:
+                    _, add = self.fen_code(item.__class__, item.color)
+                    fen_string += add
+                else:
+                    fen_string += 'o'
         return fen_string
+
+
 
 
 
