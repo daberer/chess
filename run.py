@@ -1,10 +1,10 @@
 import pygame, random
 from move import Move
-from procedure import Game, Sprites
+from procedure import Game, Sprites, Fen
 from game_over import Check_game_over
 from chess_pieces import Player
 
-def main(start_fen = None, move_count = 0, moves_dict ={0 : 'rnbqkbnrppppppppooooooooooooooooooooooooooooooooPPPPPPPPRNBQKBNR'}):
+def main(start_fen = None, move_count = 0, moves_dict ={0 : Fen().extend_fen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')}):
     pygame.init()
 
     # COLORS
