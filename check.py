@@ -112,14 +112,13 @@ class Attacked_fields:
                 left.append(l)
                 break
         for m in [(x,j) for j in [y - i for i in range(1, 9)] if j > 0 and j < 8]:
-            if self.bo[m][1] == None or (self.bo[m][1].name() == 'King' and self.piece.color !=
-                                             self.bo[m][1].color):
+            if self.bo[m][1] == None or (self.bo[m][1].name() == 'King' and self.piece.color != self.bo[m][1].color):
                 down.append(m)
             else:
                 down.append(m)
                 break
         for n in [(x,j) for j in [i + 1 for i in range(y, 8)] if j > 1 and j < 9]:
-            if self.bo[n][1] == None or (self.bo[n][1].name() == 'King' and self.piece.color != self.bo[n].color):
+            if self.bo[n][1] == None or (self.bo[n][1].name() == 'King' and self.piece.color != self.bo[n][1].color):
                 up.append(n)
             else:
                 up.append(n)
@@ -176,15 +175,15 @@ class Attacked_fields:
         ver = []
         for m in [j for j in [i + y for i in range(-2, 3, 4)] if j > 0 and j < 9]:
             if (x - 1) > 0:
-                ver.append((m, (x - 1)))
+                ver.append(((x - 1), m))
             if (x + 1) < 9:
-                ver.append((m, (x + 1)))
+                ver.append(((x + 1), m))
         hor = []
         for m in [j for j in [i + y for i in range(-1, 2, 2)] if j > 0 and j < 9]:
             if (x - 2) > 0:
-                hor.append((m, (x - 2)))
+                hor.append(((x - 2), m))
             if (x + 2) < 9:
-                hor.append((m, (x + 2)))
+                hor.append(((x + 2), m))
         return ver + hor
 
     def king_find_attacked_fields(self):

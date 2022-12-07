@@ -377,14 +377,17 @@ class Fen:
 
     def get_fen_from_board(self, board):
         fen_string = ''
-        for item in board.items():
-            if item[1][1]:
-                _, add = self.fen_code(item[1][1].__class__, item[1][1].color)
-                fen_string += add
-            else:
-                fen_string += 'o'
-
+        for y in range(8, 0, -1):
+            for x in range(1,9):
+                item = board[(x,y)][1]
+                if item:
+                    _, add = self.fen_code(item.__class__, item.color)
+                    fen_string += add
+                else:
+                    fen_string += 'o'
         return fen_string
+
+
 
 
 
