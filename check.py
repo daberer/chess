@@ -102,7 +102,7 @@ class Attacked_fields:
             else:
                 right.append(k)
                 break
-        for l in [(j,y) for j in [i for i in range(x, 1, -1)] if j > 0 and j < 8]:
+        for l in [(j,y) for j in [i for i in range(x-1, 1, -1)] if j > 0 and j < 8]:
             if self.bo[l][1] == None or (
                 self.bo[l][1].name() == 'King'
                 and self.piece.color != self.bo[l][1].color
