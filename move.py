@@ -72,15 +72,13 @@ class Move:
                 en_pawn_diff = tuple(
                     map(lambda i, j: i - j, en_pawn_field, self.old_field)
                 )
-                if round(math.hypot(en_pawn_diff[0], en_pawn_diff[1]), 2) == 100:
+                if round(math.hypot(en_pawn_diff[0], en_pawn_diff[1]), 2) == 1:
                     if (
                         self.piece.color == 'white'
-                        and self.diff[1] < 0
-                        or self.piece.color == 'black'
                         and self.diff[1] > 0
-                    ) and self.old_field[1] == en_pawn_field[
-                        1
-                    ]:  # pos1 represents movement in x-axis
+                        or self.piece.color == 'black'
+                        and self.diff[1] < 0
+                    ) and self.old_field[1] == en_pawn_field[1]:  # pos1 represents movement in x-axis
                         if not no_casualties:
                             en_pawn.kill()
                             self.game.board[en_pawn.field][1] = None
@@ -234,5 +232,5 @@ class Move:
             if self.game.board[k][1] != None:
                 if self.game.board[k][1].name() == 'Pawn':
                     if self.game.board[k][1].enpassant == True:
-                        return self.game.board[k][0], self.game.board[k][1]
+                        return k, self.game.board[k][1]
         return None, None
